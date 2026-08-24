@@ -1,0 +1,15 @@
+{
+  "Author": "Zhyra",
+  "Name": "Blackjack Advisor",
+  "Punchline": "Optimal blackjack moves for FFXIV /random card games.",
+  "Description": "Enter your hand and the dealer's up card and it tells you the mathematically best move (hit / stand / double / split), computed exactly for the in-game /random 1-13 (infinite-deck) variant. Configurable dealer rules (H17/S17), one-click buttons to say your move in chat (only when you press them, never automatic), and a live gil session tracker.",
+  "RepoUrl": "https://github.com/edg-l/BlackjackAdvisor",
+  "InternalName": "BlackjackAdvisor",
+  "ApplicableVersion": "any",
+  "Tags": [
+    "blackjack",
+    "cards",
+    "gambling",
+    "calculator"
+  ]
+}

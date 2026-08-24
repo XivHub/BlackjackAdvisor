@@ -1,0 +1,17 @@
+.vs/
+.idea/
+obj/
+bin/
+*.user
+*.suo
+
+# Local publish script (deploy paths are environment-specific)
+publish.sh
+
+# Local dev notes (not part of the plugin)
+CLAUDE.md
+AGENTS.md
+HANDOFF.md
+PLAN.md
+PLAN_QOL.md
+scratch_probe_dummy/
