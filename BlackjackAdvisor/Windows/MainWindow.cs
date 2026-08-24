@@ -12,6 +12,7 @@ using Dalamud.Interface.Windowing;
 using ECommons.Automation;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using BlackjackAdvisor.Strategy;
+using XivHubPluginKit.UI;
 
 namespace BlackjackAdvisor.Windows
 {
@@ -52,7 +53,9 @@ namespace BlackjackAdvisor.Windows
 
         private static readonly char[] Suits = { '♠', '♥', '♣', '♦' };
 
-        // Palette
+        // The card table. Baize, card stock and suit pips are the real-world
+        // objects the window depicts, not application chrome, so they are defined
+        // here and stay put; see XivHubPluginKit/UI/THEME.md.
         private static readonly Vector4 Felt = new(0.09f, 0.28f, 0.17f, 1f);
         private static readonly Vector4 FeltRim = new(0.04f, 0.15f, 0.09f, 1f);
         private static readonly Vector4 FeltText = new(0.72f, 0.86f, 0.74f, 1f);
@@ -61,10 +64,6 @@ namespace BlackjackAdvisor.Windows
         private static readonly Vector4 SuitRed = new(0.78f, 0.13f, 0.13f, 1f);
         private static readonly Vector4 SuitBlack = new(0.10f, 0.10f, 0.12f, 1f);
         private static readonly Vector4 Pill = new(0.18f, 0.18f, 0.22f, 1f);
-        private static readonly Vector4 Green = new(0.35f, 0.82f, 0.42f, 1f);
-        private static readonly Vector4 Red = new(0.90f, 0.35f, 0.35f, 1f);
-        private static readonly Vector4 Grey = new(0.6f, 0.6f, 0.6f, 1f);
-        private static readonly Vector4 Gold = new(0.95f, 0.80f, 0.30f, 1f);
         private static readonly Vector4 White = new(1f, 1f, 1f, 1f);
 
         public MainWindow(Configuration cfg) : base("Blackjack Advisor")
@@ -111,6 +110,8 @@ namespace BlackjackAdvisor.Windows
             DrawControls();
             ImGui.Separator();
             DrawLedger();
+            ImGui.Separator();
+            DrawAppearance();
         }
 
         private EvalResult Evaluate() => totalMode
@@ -162,7 +163,7 @@ namespace BlackjackAdvisor.Windows
             if (filledFromChat)
             {
                 ImGui.SameLine();
-                ImGui.TextColored(new Vector4(0.55f, 0.78f, 0.95f, 1f), "· auto-filled from chat");
+                ImGui.TextColored(HubStyle.Info, "· auto-filled from chat");
             }
 
             if (totalMode)
@@ -247,7 +248,7 @@ namespace BlackjackAdvisor.Windows
         {
             if (r == null)
             {
-                ImGui.TextColored(Grey, "Pick the dealer's up card and your cards below.");
+                ImGui.TextColored(HubStyle.Muted, "Pick the dealer's up card and your cards below.");
                 return;
             }
 
@@ -258,10 +259,10 @@ namespace BlackjackAdvisor.Windows
 
             string label;
             Vector4 col;
-            if (r.Blackjack) { label = "BLACKJACK!"; col = Gold; }
-            else if (r.Bust) { label = "BUST"; col = Red; }
+            if (r.Blackjack) { label = "BLACKJACK!"; col = HubStyle.Accent; }
+            else if (r.Bust) { label = "BUST"; col = HubStyle.Bad; }
             else if (r.HasBest) { label = MoveLabel(r.Best).ToUpperInvariant(); col = MoveColor(r.Best); }
-            else { label = "-"; col = Grey; }
+            else { label = "-"; col = HubStyle.Muted; }
 
             dl.AddRectFilled(pos, pos + new Vector2(w, bh), ImGui.GetColorU32(col * new Vector4(0.42f, 0.42f, 0.42f, 1f)), 6f);
             dl.AddRect(pos, pos + new Vector2(w, bh), ImGui.GetColorU32(col), 6f, ImDrawFlags.None, 1.5f);
@@ -284,7 +285,7 @@ namespace BlackjackAdvisor.Windows
             if (r.HasBest)
             {
                 ImGui.PushTextWrapPos(0);
-                ImGui.TextColored(new Vector4(0.80f, 0.80f, 0.86f, 1f), Explain(r));
+                ImGui.TextColored(HubStyle.Muted, Explain(r));
                 ImGui.PopTextWrapPos();
             }
 
@@ -295,7 +296,7 @@ namespace BlackjackAdvisor.Windows
 
             // Manual chat send (never automatic)
             ImGui.Dummy(new Vector2(0, 2));
-            ImGui.TextColored(Grey, $"Say in {c.ChatChannel} (click to send):");
+            ImGui.TextColored(HubStyle.Muted, $"Say in {c.ChatChannel} (click to send):");
             SendButton(Move.Stand, r);
             ImGui.SameLine(); SendButton(Move.Hit, r);
             if (OptAvailable(r, Move.Double)) { ImGui.SameLine(); SendButton(Move.Double, r); }
@@ -312,11 +313,11 @@ namespace BlackjackAdvisor.Windows
             float barW = Math.Max(40, full - labelW - valW - gap * 2);
             float barH = ImGui.GetFontSize();
 
-            uint txt = ImGui.GetColorU32(best ? Green : new Vector4(0.85f, 0.85f, 0.85f, 1f));
+            uint txt = ImGui.GetColorU32(best ? HubStyle.Good : HubStyle.Muted);
             dl.AddText(p0, txt, MoveLabel(o.Move));
 
             var barPos = new Vector2(p0.X + labelW, p0.Y);
-            dl.AddRectFilled(barPos, barPos + new Vector2(barW, barH), ImGui.GetColorU32(new Vector4(0.17f, 0.17f, 0.19f, 1f)), 3f);
+            dl.AddRectFilled(barPos, barPos + new Vector2(barW, barH), ImGui.GetColorU32(HubColors.Get("HubFrameBg")), 3f);
             float center = barPos.X + barW * 0.5f;
             float t = Math.Clamp((float)o.EV, -1.5f, 1.5f) / 1.5f;
             uint fill = ImGui.GetColorU32(o.EV >= 0 ? new Vector4(0.30f, 0.70f, 0.35f, 1f) : new Vector4(0.80f, 0.32f, 0.32f, 1f));
@@ -324,9 +325,9 @@ namespace BlackjackAdvisor.Windows
                 dl.AddRectFilled(new Vector2(center, barPos.Y), new Vector2(center + t * barW * 0.5f, barPos.Y + barH), fill, 3f);
             else
                 dl.AddRectFilled(new Vector2(center + t * barW * 0.5f, barPos.Y), new Vector2(center, barPos.Y + barH), fill, 3f);
-            dl.AddLine(new Vector2(center, barPos.Y), new Vector2(center, barPos.Y + barH), ImGui.GetColorU32(new Vector4(0.55f, 0.55f, 0.55f, 1f)), 1f);
+            dl.AddLine(new Vector2(center, barPos.Y), new Vector2(center, barPos.Y + barH), ImGui.GetColorU32(HubStyle.Faint), 1f);
             if (best)
-                dl.AddRect(barPos, barPos + new Vector2(barW, barH), ImGui.GetColorU32(Green), 3f, ImDrawFlags.None, 1.5f);
+                dl.AddRect(barPos, barPos + new Vector2(barW, barH), ImGui.GetColorU32(HubStyle.Good), 3f, ImDrawFlags.None, 1.5f);
 
             dl.AddText(new Vector2(p0.X + labelW + barW + gap, p0.Y), txt, FormatEV(o.EV));
             ImGui.Dummy(new Vector2(full, barH + 4));
@@ -338,10 +339,11 @@ namespace BlackjackAdvisor.Windows
         {
             bool best = r.HasBest && m == r.Best;
             string phrase = PhraseFor(m);
-            if (best) ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.20f, 0.45f, 0.22f, 1f));
+            // The recommended move is the one button here that puts a message in
+            // public chat, so it is the window's primary action.
+            using IDisposable? primary = best ? HubStyle.Primary() : null;
             if (ImGui.Button($"{phrase}##say{m}"))
                 Send(phrase);
-            if (best) ImGui.PopStyleColor();
         }
 
         private void Send(string phrase)
@@ -362,13 +364,18 @@ namespace BlackjackAdvisor.Windows
             {
                 if (v > 1) ImGui.SameLine();
                 bool sel = dealer.HasValue && dealer.Value.Rank == RankLabel(v);
-                if (sel) ImGui.PushStyleColor(ImGuiCol.Button, Gold);
+                // Selection reads as gold on the dark ramp, never a gold fill.
+                if (sel)
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Button, HubColors.Get("HubActive"));
+                    ImGui.PushStyleColor(ImGuiCol.Text, HubStyle.Accent);
+                }
                 if (ImGui.Button($"{RankLabel(v)}##d{v}", new Vector2(34, 0)))
                 {
                     dealer = new Card(RankLabel(v), '♠');
                     filledFromChat = false;
                 }
-                if (sel) ImGui.PopStyleColor();
+                if (sel) ImGui.PopStyleColor(2);
             }
             ImGui.SameLine();
             if (ImGui.Button("Clear##dclr")) dealer = null;
@@ -451,6 +458,16 @@ namespace BlackjackAdvisor.Windows
             ImGui.TextDisabled("Exact EV for the in-game /random (infinite-deck) game.");
         }
 
+        // The theme editor is generated from the kit's option table, so this stays
+        // one call however many themed values the kit grows.
+        private static void DrawAppearance()
+        {
+            if (!ImGui.CollapsingHeader("Appearance")) return;
+            ImGui.TextColored(HubStyle.Faint, "Shared with every XIV Hub plugin.");
+            ImGui.Spacing();
+            HubThemeEditor.Draw(Plugin.ThemeConfig);
+        }
+
         private void PhraseInput(string label, Func<string> get, Action<string> set)
         {
             var v = get();
@@ -482,7 +499,7 @@ namespace BlackjackAdvisor.Windows
             ImGui.SameLine();
             ImGui.Text("   Session:");
             ImGui.SameLine();
-            ImGui.TextColored(net > 0 ? Green : net < 0 ? Red : Grey, $"{(net >= 0 ? "+" : "")}{net:N0}");
+            ImGui.TextColored(net > 0 ? HubStyle.Good : net < 0 ? HubStyle.Bad : HubStyle.Muted, $"{(net >= 0 ? "+" : "")}{net:N0}");
 
             ImGui.Text($"Hands: {hands}   W {wins}  L {losses}  P {pushes}");
 
@@ -821,7 +838,7 @@ namespace BlackjackAdvisor.Windows
             Move.Hit => new(0.85f, 0.58f, 0.20f, 1f),
             Move.Double => new(0.28f, 0.68f, 0.38f, 1f),
             Move.Split => new(0.58f, 0.38f, 0.74f, 1f),
-            _ => Grey,
+            _ => HubStyle.Muted,
         };
 
         private string PhraseFor(Move m) => m switch
