@@ -579,10 +579,12 @@ namespace BlackjackAdvisor.Windows
         private static readonly Regex ActionRx = new(
             @"^\s*(.+?)\s+(?:chooses|choose|decides|opts|wants|is\s+forced)(?:\s+to)?\s+(hit|stand|double|split)",
             RegexOptions.IgnoreCase | RegexOptions.Compiled);
-        // A hand announced as a number on its own line: "15", "1 or 11", "1/11", "Blackjack 16".
-        // An ace is written both ways, so the second number is the soft reading either way.
+        // A hand announced as a number on its own line: "15", "1 or 11", "1/11", "Blackjack 16",
+        // or with the pair a dealer offers to split: "14 or 7/7 splits". An ace is written both
+        // ways, so the last number is the soft reading either way.
         private static readonly Regex BareTotalRx = new(
-            @"^[\s\-–—]*(?:blackjack|total|score|hand)?[\s:!.]*(\d{1,2})(?:\s*(?:or|/)\s*(\d{1,2}))?\s*[.!]*$",
+            @"^[\s\-–—]*(?:blackjack|total|score|hand)?[\s:!.]*(\d{1,2})"
+            + @"(?:\s*or\s*(\d{1,2})\s*/\s*(\d{1,2})\s*splits?|\s*(?:or|/)\s*(\d{1,2}))?\s*[.!]*$",
             RegexOptions.IgnoreCase | RegexOptions.Compiled);
         // A /random result: "(1-13) 9", tolerant of locale prefix (Random!/Würfeln!), en/em dashes and spacing.
         private static readonly Regex RandomRx = new(@"\(\s*\d{1,2}\s*[-–—]\s*\d{1,2}\s*\)\s*(\d{1,2})", RegexOptions.Compiled);
@@ -604,7 +606,7 @@ namespace BlackjackAdvisor.Windows
             if (!c.AutoFillFromChat) return;
 
             string text, sender;
-            try { text = handler.Message.TextValue; sender = handler.Sender.TextValue ?? ""; }
+            try { text = Deglyph(handler.Message.TextValue); sender = Deglyph(handler.Sender.TextValue ?? ""); }
             catch { return; }
             if (string.IsNullOrEmpty(text)) return;
             lastChatText = text;
@@ -788,8 +790,10 @@ namespace BlackjackAdvisor.Windows
         // total is authoritative: cards that disagree with it mean a draw line was missed.
         private void ApplyBareTotal(Match m, string me)
         {
-            bool soft = m.Groups[2].Success;
-            int n = int.Parse(soft ? m.Groups[2].Value : m.Groups[1].Value);
+            bool soft = m.Groups[4].Success;
+            int n = int.Parse(soft ? m.Groups[4].Value : m.Groups[1].Value);
+            // "14 or 7/7 splits" — the dealer is offering the split, so the hand is that pair.
+            bool pair = m.Groups[2].Success && m.Groups[2].Value == m.Groups[3].Value;
 
             if (dealingTo == "Dealer")
             {
@@ -803,13 +807,13 @@ namespace BlackjackAdvisor.Windows
 
             if (dealingTo == null || !NameIs(dealingTo, me) || n is < 2 or > 21) return;
 
-            if (hand.Count > 0)
+            if (hand.Count > 0 && !pair)
             {
                 int high = HandTotal(hand, out bool isSoft);
                 if (n == high || n == (isSoft ? high - 10 : high)) return;
                 Dbg($"cards total {high}, dealer said {n} -> total mode");
             }
-            inTotal = n; inSoft = soft; inPair = false;
+            inTotal = n; inSoft = soft; inPair = pair;
             totalMode = true; filledFromChat = true;
         }
 
@@ -843,6 +847,22 @@ namespace BlackjackAdvisor.Windows
             yield return $"{first} {last[0]}.";
             yield return $"{first[0]}. {last}";
             yield return $"{first[0]}. {last[0]}.";
+        }
+
+        // Dealers write words in the game's boxed letters (U+E071-U+E08A = A-Z), so "the DEALER's
+        // first Card" reaches a plugin as six private-use glyphs where the word should be. Read them
+        // back as letters before anything else looks at the line; the remaining private-use
+        // characters (job and world icons) are decoration and are dropped by CleanName.
+        private static string Deglyph(string s)
+        {
+            char[]? a = null;
+            for (int i = 0; i < s.Length; i++)
+                if (s[i] is >= '\uE071' and <= '\uE08A')
+                {
+                    a ??= s.ToCharArray();
+                    a[i] = (char)('A' + (s[i] - '\uE071'));
+                }
+            return a == null ? s : new string(a);
         }
 
         private static string CleanName(string s)

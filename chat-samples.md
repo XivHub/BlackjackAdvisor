@@ -80,5 +80,11 @@ Parsing notes:
   the first of them, so later draws never replace it.
 - `<name> chooses to Hit` / `<name> chooses Hit!` (the "to" is not always there) / `is forced to
   Stand`, and the `<name>, would you like to ...` prompt, say who the next `Random!` belongs to.
-- A bare total line (`18`, `1 or 11`, `Blackjack 16`) fills the hand when the draws were missed,
-  and overrides parsed cards when it disagrees with them.
+- A bare total line (`18`, `1 or 11`, `1/11`, `14 or 7/7 splits`, `Blackjack 16`) fills the hand
+  when the draws were missed, and overrides parsed cards when it disagrees with them. The `7/7`
+  form also says the hand is a pair, which is what makes split advice possible here.
+- Words in the game's boxed letters (U+E071-U+E08A = A-Z) are text, not decoration. This dealer
+  writes `DEALER` that way, so the raw line reads `Time to reveal the 's first Card!` once those
+  characters are dropped. Read them back as letters before parsing; the job and world icons
+  (other private-use characters) really are decoration.
+- The dealer's macro states the house rule out loud: `DEALER is below 16 and rolls again.`
