@@ -9,21 +9,23 @@ using BlackjackAdvisor.Strategy;
 
 bool noBuiltins = false;
 bool engineCheck = false;
+bool dumpTrace = false;
 var fixtures = new List<string>();
 foreach (var a in args)
 {
     if (a == "--no-builtins") noBuiltins = true;
     else if (a == "--engine-check") engineCheck = true;
+    else if (a == "--dump-trace") dumpTrace = true;
     else fixtures.Add(a);
 }
 
 int failures = 0;
 if (engineCheck) failures += EngineCheck.Run();
-foreach (var fixture in fixtures) failures += FixtureRunner.Run(fixture, noBuiltins);
+foreach (var fixture in fixtures) failures += FixtureRunner.Run(fixture, noBuiltins, dumpTrace);
 
 if (!engineCheck && fixtures.Count == 0)
 {
-    Console.Error.WriteLine("usage: ParserHarness [--no-builtins] [--engine-check] <fixture.log> [...]");
+    Console.Error.WriteLine("usage: ParserHarness [--no-builtins] [--engine-check] [--dump-trace] <fixture.log|fixture.expect> [...]");
     return 1;
 }
 
@@ -51,11 +53,29 @@ static class FixtureRunner
         "CrossLinkShell5", "CrossLinkShell6", "CrossLinkShell7", "CrossLinkShell8", "Echo",
     };
 
-    public static int Run(string logPath, bool noBuiltins)
+    public static int Run(string fixturePath, bool noBuiltins, bool dumpTrace = false)
     {
-        string expectPath = Path.ChangeExtension(logPath, ".expect");
-        if (!File.Exists(logPath)) { Console.Error.WriteLine($"FAIL {logPath}: no such fixture"); return 1; }
-        if (!File.Exists(expectPath)) { Console.Error.WriteLine($"FAIL {logPath}: missing {expectPath}"); return 1; }
+        // A fixture is normally named for its own capture (venue-lina.log / .expect). A second
+        // .expect can replay the SAME capture under a different name (venue-lina.learn.expect)
+        // without duplicating the log — point at the .expect directly and name the log it replays
+        // with a "#log <relative path>" directive instead of deriving one by extension.
+        string expectPath, logPath;
+        if (fixturePath.EndsWith(".expect", StringComparison.Ordinal))
+        {
+            expectPath = fixturePath;
+            string? logDirective = File.Exists(expectPath)
+                ? File.ReadLines(expectPath).FirstOrDefault(l => l.TrimStart().StartsWith("#log "))
+                : null;
+            if (logDirective == null) { Console.Error.WriteLine($"FAIL {fixturePath}: no such fixture, or missing '#log' directive"); return 1; }
+            logPath = Path.Combine(Path.GetDirectoryName(expectPath) ?? "", logDirective.TrimStart()["#log ".Length..].Trim());
+        }
+        else
+        {
+            logPath = fixturePath;
+            expectPath = Path.ChangeExtension(logPath, ".expect");
+        }
+        if (!File.Exists(logPath)) { Console.Error.WriteLine($"FAIL {fixturePath}: no such fixture"); return 1; }
+        if (!File.Exists(expectPath)) { Console.Error.WriteLine($"FAIL {fixturePath}: missing {expectPath}"); return 1; }
 
         var chatLines = new List<(string Time, string Kind, string Sender, string Text)>();
         foreach (var raw in File.ReadLines(logPath))
@@ -65,6 +85,7 @@ static class FixtureRunner
         }
 
         string? me = null, dealer = null;
+        var roster = new List<string>();
         var checks = new List<(string Time, Dictionary<string, string> Fields)>();
         foreach (var raw in File.ReadLines(expectPath))
         {
@@ -72,6 +93,7 @@ static class FixtureRunner
             if (line.Length == 0 || line.StartsWith('#') is false) continue;
             if (line.StartsWith("#me ")) me = line["#me ".Length..].Trim();
             else if (line.StartsWith("#dealer ")) dealer = line["#dealer ".Length..].Trim();
+            else if (line.StartsWith("#roster ")) roster.Add(line["#roster ".Length..].Trim());
             else if (line.StartsWith("#at "))
             {
                 var rest = line["#at ".Length..].Trim();
@@ -88,14 +110,19 @@ static class FixtureRunner
             }
         }
 
-        if (me == null) { Console.Error.WriteLine($"FAIL {logPath}: .expect has no #me directive"); return 1; }
+        if (me == null) { Console.Error.WriteLine($"FAIL {fixturePath}: .expect has no #me directive"); return 1; }
 
-        // SEAM: --no-builtins is accepted here so a fixture can assert that learned bindings alone
-        // reproduce a venue's hand-filling with the built-in regexes disabled entirely. ChatParser
-        // has no such switch yet, so the flag is a no-op today — flip this seam once it does.
-        _ = noBuiltins;
-        var host = new HarnessHost { LocalPlayerName = me, ConfiguredDealerName = dealer ?? "" };
-        var parser = new ChatParser(host);
+        var trace = new List<string>();
+        var host = new HarnessHost
+        {
+            LocalPlayerName = me,
+            ConfiguredDealerName = dealer ?? "",
+            RosterNames = roster,
+            Trace = trace,
+        };
+        // --no-builtins disables the attribution regexes below the learned-store lookup, so a
+        // fixture can prove learned bindings alone reproduce a venue's hand-filling.
+        var parser = new ChatParser(host, noBuiltins);
 
         int failed = 0, fed = 0;
         foreach (var (time, fields) in checks)
@@ -125,16 +152,58 @@ static class FixtureRunner
                 ["dealingTo"] = (snap.DealingTo ?? "-").Replace(' ', '_'),
             };
 
-            var mismatches = fields.Where(kv => !actual.TryGetValue(kv.Key, out var v) || v != kv.Value).ToList();
+            var mismatches = fields
+                .Where(kv => kv.Key != "trace")
+                .Where(kv => !actual.TryGetValue(kv.Key, out var v) || v != kv.Value)
+                .ToList();
+            // trace=some_substring: at least one logged line so far contains "some substring".
+            // Checks what the learner has done up to this point without parsing its whole vocabulary.
+            if (fields.TryGetValue("trace", out var wantSubstring))
+            {
+                string needle = wantSubstring.Replace('_', ' ');
+                if (!trace.Any(t => t.Contains(needle, StringComparison.Ordinal)))
+                    mismatches.Add(new KeyValuePair<string, string>("trace", wantSubstring));
+            }
+
             bool ok = mismatches.Count == 0;
             string fieldStr = string.Join(' ', fields.Select(kv => $"{kv.Key}={kv.Value}"));
-            Console.WriteLine($"{(ok ? "PASS" : "FAIL")} {Path.GetFileName(logPath)} @{time} {fieldStr}");
+            Console.WriteLine($"{(ok ? "PASS" : "FAIL")} {Path.GetFileName(fixturePath)} @{time} {fieldStr}");
             if (!ok)
             {
                 failed++;
                 foreach (var kv in mismatches)
-                    Console.WriteLine($"     expected {kv.Key}={kv.Value}, got {kv.Key}={actual[kv.Key]}");
+                    Console.WriteLine(kv.Key == "trace"
+                        ? $"     expected trace to contain '{kv.Value.Replace('_', ' ')}', it never did"
+                        : $"     expected {kv.Key}={kv.Value}, got {kv.Key}={actual[kv.Key]}");
             }
+        }
+
+        failed += CheckBindInvariant(fixturePath, trace);
+        if (dumpTrace) foreach (var t in trace) Console.Error.WriteLine($"TRACE {Path.GetFileName(fixturePath)}: {t}");
+        return failed;
+    }
+
+    // No "bind <role> '<template>'" line may appear in the trace without a preceding
+    // "hyp confirm (2/2) <role> '<template>'" for that same (role, template) pair — mechanically
+    // checked here so the invariant cannot silently regress.
+    private static readonly Regex BindLineRx = new(@"^bind (\S+) '(.+)'$", RegexOptions.Compiled);
+    private static readonly Regex ConfirmTwoLineRx = new(@"^hyp confirm \(2/2\) (\S+) '(.+)'$", RegexOptions.Compiled);
+
+    private static int CheckBindInvariant(string fixturePath, List<string> trace)
+    {
+        int failed = 0;
+        for (int i = 0; i < trace.Count; i++)
+        {
+            var bind = BindLineRx.Match(trace[i]);
+            if (!bind.Success) continue;
+            string role = bind.Groups[1].Value, template = bind.Groups[2].Value;
+            bool confirmed = trace.Take(i).Any(t =>
+            {
+                var m = ConfirmTwoLineRx.Match(t);
+                return m.Success && m.Groups[1].Value == role && m.Groups[2].Value == template;
+            });
+            Console.WriteLine($"{(confirmed ? "PASS" : "FAIL")} {Path.GetFileName(fixturePath)} bind-invariant {role} '{template}'");
+            if (!confirmed) failed++;
         }
         return failed;
     }
@@ -143,7 +212,10 @@ static class FixtureRunner
     {
         public string? LocalPlayerName { get; set; }
         public string ConfiguredDealerName { get; set; } = "";
-        public void Log(string message) { /* the trace is not asserted on in Phase 1b */ }
+        public IReadOnlyList<string> RosterNames { get; set; } = Array.Empty<string>();
+        public bool LearnDealerWording { get; set; } = true;
+        public List<string> Trace { get; set; } = new();
+        public void Log(string message) => Trace.Add(message);
     }
 }
 

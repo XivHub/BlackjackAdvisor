@@ -1,0 +1,27 @@
+#me Nyx Ashworth
+#dealer Table Host
+
+# A hand-written venue whose wording shares nothing with any built-in regex ("Opening draw for
+# <name> coming up~", "House shows its first card.", "<name> takes another card", "House draws
+# again."). Replayed with --no-builtins, the four attribution roles must be learned from the
+# checksum alone — round 1 gives each role its first confirmation, round 2 its second (with a
+# different roll multiset each time), which is what auto-bind requires.
+
+# Rounds 1 and 2: nothing is bound yet, so nothing fills. The learner is only watching.
+#at 00:00:05.000 hand=- up=- total=- mode=cards
+#at 00:00:14.000 hand=- up=- total=- mode=cards
+#at 00:00:24.000 hand=- up=- total=- mode=cards
+#at 00:00:33.000 hand=- up=- total=- mode=cards
+
+# By the end of round 2 every role has bound.
+#at 00:00:35.000 trace=bind_deal-to
+#at 00:00:35.000 trace=bind_dealer-first
+#at 00:00:35.000 trace=bind_dealer-next
+#at 00:00:35.000 trace=bind_acting
+
+# Round 3: the same wording, now dispatched from the learned store with zero user input. The
+# hand fills from "Opening draw for Nyx Ashworth coming up~" alone, the up card from "House shows
+# its first card.", and a second dealer draw neither re-triggers nor clears it.
+#at 00:00:43.000 hand=10,A up=- total=- mode=cards dealingTo=Nyx_Ashworth
+#at 00:00:46.000 hand=10,A up=9 total=- mode=cards dealingTo=Dealer
+#at 00:00:49.000 hand=10,A up=9 total=- mode=cards dealingTo=Dealer

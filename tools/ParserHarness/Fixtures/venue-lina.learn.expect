@@ -1,0 +1,43 @@
+#log venue-lina.log
+#me Mira Kaine
+#dealer Ayla C.Odin
+
+# Replays the real venue-lina.log capture with --no-builtins: every attribution regex below the
+# learned-store lookup is off, so deal-to, dealer-first and dealer-next can only fill a hand by
+# being learned from the checksum — two confirmations with differing rolls each, exactly as they
+# occur in this real session.
+#
+# Acting does not bind from this particular capture, and that is a fact about the capture, not a
+# bug: the only two "<name> chooses Hit!" lines in it are "chooses Hit" alone (2 literal words),
+# which never clears LineTemplate.IsTooGeneral's 3-word floor, so it can never become a candidate
+# opener at all; and of the two, one ends in a bust, which the learner excludes from ever
+# forming an equation. The "<name>, would you like to Hit, Stand or Double Down?" prompt is
+# longer-worded and would qualify, but every occurrence in this session is followed by something
+# other than a roll (a stand, a split) before the next dealer line, so no group ever opens from
+# it either. venue-synthetic.log's "<name> takes another card" wording covers the role instead.
+
+# deal-to's first confirmation is the "15" total (21:37:08.878, rolls 11,5); its second — with a
+# different roll multiset — is "14 or 7/7 splits" (21:39:16.990, rolls 7,7), which is what binds it.
+#at 21:39:16.990 trace=bind_deal-to
+#at 21:39:21.400 trace=bind_dealer-first
+
+# From here on deal-to and dealer-first are already bound, so every fill below comes from the
+# learned store, not a built-in regex.
+#at 21:42:05.524 hand=Q,A up=- total=- mode=cards
+#at 21:42:22.854 hand=- up=- total=- mode=cards dealingTo=-
+#at 21:48:24.034 hand=9,J up=- total=- mode=cards
+#at 21:48:25.356 hand=9,J up=- total=- mode=cards
+#at 21:48:27.671 hand=9,J up=8 total=- mode=cards dealingTo=Dealer
+#at 21:48:35.427 hand=9,J up=8 total=- mode=cards dealingTo=Dealer
+
+# dealer-next's second confirmation is the total right here — it binds from this exact total.
+#at 21:48:37.054 trace=bind_dealer-next
+#at 21:48:40.544 hand=- up=- total=- mode=cards dealingTo=-
+
+# By here dealer-next is bound too.
+#at 22:15:46.392 hand=6,6 up=- total=- mode=cards split=false
+#at 22:15:50.453 hand=- up=- total=12 mode=total pair=true split=false
+#at 22:15:54.100 hand=- up=6 total=12 mode=total split=false
+#at 22:17:16.394 hand=7,3 up=6 total=- mode=cards split=false
+#at 22:18:16.187 hand=- up=6 total=- mode=cards split=true dealingTo=Dealer
+#at 22:18:21.612 hand=- up=- total=- mode=cards split=false dealingTo=-

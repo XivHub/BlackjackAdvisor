@@ -8,6 +8,7 @@ using Dalamud.Game.Text;
 using Dalamud.Interface.ManagedFontAtlas;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
+using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using BlackjackAdvisor.Chat;
 using BlackjackAdvisor.Strategy;
@@ -19,6 +20,10 @@ namespace BlackjackAdvisor.Windows
     {
         private readonly Configuration c;
         private readonly ChatParser parser;
+
+        // Cached on the framework thread (the name-collision guard needs it on the chat
+        // thread), read on whichever thread asks — a reference swap is all that needs to be atomic.
+        private volatile IReadOnlyList<string> rosterCache = Array.Empty<string>();
 
         private BlackjackEngine? engine;
         private bool lastH17, lastDas;
@@ -48,6 +53,10 @@ namespace BlackjackAdvisor.Windows
         {
             c = cfg;
             parser = new ChatParser(this);
+            // Config is sanitized before this window exists (see Plugin.cs); loading here means a
+            // config saved by an older version, or one with a role id this build no longer knows,
+            // never reaches the store at all.
+            foreach (var line in c.LearnedLines) parser.Store.Add(line);
             SizeConstraints = new WindowSizeConstraints
             {
                 MinimumSize = new Vector2(400, 440),
@@ -56,18 +65,27 @@ namespace BlackjackAdvisor.Windows
             bigFont = Plugin.PluginInterface.UiBuilder.FontAtlas
                 .NewDelegateFontHandle(e => e.OnPreBuild(tk => tk.AddDalamudDefaultFont(34f)));
             Plugin.ChatGui.ChatMessage += OnChatMessage;
+            Plugin.Framework.Update += OnFrameworkUpdate;
         }
 
         public void Dispose()
         {
             Plugin.ChatGui.ChatMessage -= OnChatMessage;
+            Plugin.Framework.Update -= OnFrameworkUpdate;
             bigFont.Dispose();
         }
+
+        // Refreshes the roster from the object table on the framework thread, once a frame — the
+        // learner reads the cached snapshot from the chat thread via IParserHost.RosterNames.
+        private void OnFrameworkUpdate(IFramework framework) =>
+            rosterCache = Plugin.ObjectTable.PlayerObjects.Select(p => p.Name.TextValue).ToArray();
 
         // ---- IParserHost ---------------------------------------------------------------
 
         public string? LocalPlayerName => Plugin.ObjectTable.LocalPlayer?.Name.TextValue;
         public string ConfiguredDealerName => c.DealerName;
+        public IReadOnlyList<string> RosterNames => rosterCache;
+        public bool LearnDealerWording => c.LearnDealerWording;
 
         // The parser trace goes to the dev log whenever one is configured, and to game chat only
         // when the user asked to see it there.
@@ -92,6 +110,14 @@ namespace BlackjackAdvisor.Windows
 
         public override void Draw()
         {
+            // At most one Save() per frame, and only from this thread — never the chat thread the
+            // learner runs on.
+            if (parser.LearnedDirty)
+            {
+                c.Save();
+                parser.ClearLearnedDirty();
+            }
+
             var snap = parser.State.Read();
             bool ready = snap.Dealer.HasValue && (snap.TotalMode || snap.Hand.Count > 0);
             EvalResult? r = ready ? Evaluate(snap) : null;
@@ -105,7 +131,15 @@ namespace BlackjackAdvisor.Windows
             ImGui.Spacing();
             DrawTable(snap, r);
             ImGui.Spacing();
-            DrawRecommendation(r, snap);
+            if (parser.Hypotheses.ValuesLookWrong)
+            {
+                ImGui.TextColored(HubStyle.Warn, "This table's totals don't match the card values I know.");
+                ImGui.TextColored(HubStyle.Muted, "Enter your hand by hand and check the host's rules.");
+            }
+            else
+            {
+                DrawRecommendation(r, snap);
+            }
             ImGui.Separator();
             DrawControls();
             ImGui.Separator();

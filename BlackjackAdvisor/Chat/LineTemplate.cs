@@ -148,5 +148,58 @@ namespace BlackjackAdvisor.Chat
             int words = slot.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
             return words <= 4;
         }
+
+        // Runs the exact word-splitting half of Canon (everything but the final lowercase), but
+        // keeps, for each resulting word, the original raw substring that produced it — including
+        // punctuation Canon itself throws away, such as the period in "K.". Deglyph and
+        // NormalizeDigits are both length- and position-preserving, so only the PUA strip needs an
+        // explicit index map back to raw.
+        private static (string[] CanonWords, string[] RawWords) WordsWithRawSpans(string raw)
+        {
+            string s1 = ChatText.Deglyph(raw);
+
+            var s2 = new StringBuilder(s1.Length);
+            var toRaw = new List<int>(s1.Length);
+            for (int i = 0; i < s1.Length; i++)
+            {
+                if (s1[i] < PuaAreaStart || s1[i] > PuaAreaEnd) { s2.Append(s1[i]); toRaw.Add(i); }
+            }
+
+            string s3 = ChatText.NormalizeDigits(s2.ToString());
+            var s4 = new StringBuilder(s3.Length);
+            foreach (char ch in s3)
+                s4.Append(char.IsLetterOrDigit(ch) || ch == ' ' || Array.IndexOf(SuitGlyphs, ch) >= 0 ? ch : ' ');
+
+            var canonWords = new List<string>();
+            var rawWords = new List<string>();
+            foreach (Match m in Regex.Matches(s4.ToString(), @"\S+"))
+            {
+                canonWords.Add(m.Value.ToLowerInvariant());
+                int rawStart = toRaw[m.Index];
+                int rawEnd = toRaw[m.Index + m.Length - 1] + 1;
+                rawWords.Add(raw[rawStart..rawEnd]);
+            }
+            return (canonWords.ToArray(), rawWords.ToArray());
+        }
+
+        /// <summary>Maps a slot value captured against canon text back to the dealer's original
+        /// wording for it — "Mira K.", not "mira k" — by locating the same run of canon words and
+        /// reading off their original raw spans. Falls back to the canon value itself if the run
+        /// cannot be found (should not happen: it is built from the very same text).</summary>
+        public static string RecoverOriginalCase(string raw, string canonSlot)
+        {
+            var (canonWords, rawWords) = WordsWithRawSpans(raw);
+            var slotWords = canonSlot.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (slotWords.Length == 0) return canonSlot;
+
+            for (int start = 0; start + slotWords.Length <= canonWords.Length; start++)
+            {
+                bool match = true;
+                for (int k = 0; k < slotWords.Length; k++)
+                    if (!string.Equals(canonWords[start + k], slotWords[k], StringComparison.Ordinal)) { match = false; break; }
+                if (match) return string.Join(' ', rawWords.Skip(start).Take(slotWords.Length));
+            }
+            return canonSlot;
+        }
     }
 }

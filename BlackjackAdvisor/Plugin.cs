@@ -21,6 +21,7 @@ namespace BlackjackAdvisor
         [PluginService] internal static ICommandManager CommandManager { get; private set; } = null!;
         [PluginService] public static IChatGui ChatGui { get; private set; } = null!;
         [PluginService] public static IObjectTable ObjectTable { get; private set; } = null!;
+        [PluginService] public static IFramework Framework { get; private set; } = null!;
         [PluginService] public static IPluginLog Logger { get; private set; } = null!;
 
         public Configuration Configuration { get; init; }

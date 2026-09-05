@@ -61,6 +61,18 @@ namespace BlackjackAdvisor.Chat
             if (candidate.Length == 0 || string.IsNullOrEmpty(me)) return false;
             foreach (var form in NameForms(me))
                 if (candidate.StartsWith(form, System.StringComparison.OrdinalIgnoreCase)) return true;
+
+            // A learned template's <name> slot is captured from canonicalized text — lowercased,
+            // with punctuation stripped to spaces by LineTemplate.Canon — so "Mira K." arrives here
+            // as "mira k". Compare canonically too, or every abbreviated form with a trailing
+            // initial ("K.", "R.") would silently stop matching the moment its line is learned.
+            string canonCandidate = LineTemplate.Canon(candidate);
+            foreach (var form in NameForms(me))
+            {
+                string canonForm = LineTemplate.Canon(form);
+                if (canonCandidate == canonForm || canonCandidate.StartsWith(canonForm + " ", System.StringComparison.Ordinal))
+                    return true;
+            }
             return false;
         }
 
@@ -70,6 +82,18 @@ namespace BlackjackAdvisor.Chat
             foreach (var form in NameForms(me))
                 if (text.Contains(form, System.StringComparison.OrdinalIgnoreCase)) return true;
             return false;
+        }
+
+        /// <summary>The exact wording a known name would render as in chat, matched against a
+        /// slot captured in canon form ("mira k") — returns "Mira K.", punctuation and all,
+        /// instead of a best-effort reconstruction of whatever the dealer actually typed. Null
+        /// when the slot names someone not in <paramref name="knownFullNames"/>.</summary>
+        public static string? BestDisplayForm(string canonSlot, IEnumerable<string> knownFullNames)
+        {
+            foreach (var full in knownFullNames)
+                foreach (var form in NameForms(full))
+                    if (LineTemplate.Canon(form) == canonSlot) return form;
+            return null;
         }
 
         public static IEnumerable<string> NameForms(string me)

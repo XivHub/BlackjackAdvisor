@@ -12,6 +12,11 @@ namespace BlackjackAdvisor.Chat
     {
         private readonly IParserHost host;
         private readonly TemplateStore store;
+        private readonly Evidence evidence = new();
+        private readonly RollGroupTracker rollGroups = new();
+        private readonly HypothesisEngine hypotheses;
+        private readonly bool noBuiltins;
+        private volatile bool learnedDirty;
         private string? dealerSender;   // auto-locked dealer sender name
         private string? lastChatText;   // for /bj parse
         private DateTime lastAt;        // for /bj parse
@@ -21,10 +26,17 @@ namespace BlackjackAdvisor.Chat
         private DateTime? dealingToSetAt;    // when DealingTo last changed or last saw an attributed roll
         private TemplateRole? lastRoleEvent; // the most recent non-roll line classification, learned or built-in
 
-        public ChatParser(IParserHost host)
+        /// <summary>noBuiltins disables the built-in attribution regexes below the learned-store
+        /// lookup — the wording guesses a venue-specific macro would otherwise need. Roll
+        /// recognition, bare-total/outcome recognition and the safety net stay active either way:
+        /// they are fixed game-format constants the checksum itself depends on, never something a
+        /// venue improvises.</summary>
+        public ChatParser(IParserHost host, bool noBuiltins = false)
         {
             this.host = host;
+            this.noBuiltins = noBuiltins;
             store = new TemplateStore(msg => host.Log(msg));
+            hypotheses = new HypothesisEngine(host, store, () => host.LearnDealerWording, () => learnedDirty = true);
         }
 
         public HandState State { get; } = new();
@@ -32,6 +44,16 @@ namespace BlackjackAdvisor.Chat
         /// <summary>The learned wording bindings this parser consults ahead of its built-in
         /// regexes. Empty until something adds to it — nothing in this parser learns on its own.</summary>
         public TemplateStore Store => store;
+
+        /// <summary>The checksum learner: hypotheses under test, auto-bind, unbind-on-contradiction
+        /// and the card-value sanity check.</summary>
+        public HypothesisEngine Hypotheses => hypotheses;
+
+        /// <summary>Set by the learner whenever it binds, unbinds, or otherwise changes
+        /// <see cref="Store"/>. The host flushes it to disk from the draw thread, at most once a
+        /// frame — never from the chat thread this flag is set on.</summary>
+        public bool LearnedDirty => learnedDirty;
+        public void ClearLearnedDirty() => learnedDirty = false;
 
         /// <summary>The local player split, so the chat no longer describes one hand this parser can follow.</summary>
         public bool SplitHands => splitHands;
@@ -41,6 +63,7 @@ namespace BlackjackAdvisor.Chat
         {
             splitHands = false;
             State.ResetForNextRound();
+            hypotheses.ResetForNextRound();
         }
 
         // Whether the cards being dealt right now are the local player's.
@@ -102,6 +125,10 @@ namespace BlackjackAdvisor.Chat
         private static readonly Regex HouseStandsRx = new(
             @"\bstands?\s+(?:on|at)\s+(?:soft\s+|hard\s+|all\s+)?(\d{1,2})", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex SummaryRx = new(@"([^,]+?)'s\s+hand\s+is\s+(\d{1,2})", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        // A natural blackjack is always worth 21; a bust carries no total at all. Both are chat-format
+        // constants the checksum learner reads regardless of --no-builtins, same as BareTotalRx.
+        private static readonly Regex OutcomeBlackjackRx = new(@"\b(?:got|has)\s+a\s+blackjack\b|blackjack!", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex OutcomeBustRx = new(@"\bbusted\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         // Attribution safety net: bounds on how long, and how far, a guess is trusted.
         private static readonly TimeSpan DealingToTimeout = TimeSpan.FromSeconds(45);
@@ -149,7 +176,59 @@ namespace BlackjackAdvisor.Chat
                           || text.Contains("Dealer's Hand", StringComparison.OrdinalIgnoreCase);
             if (marker && !string.IsNullOrEmpty(sender)) dealerSender = ChatText.CleanName(sender);
 
-            HandleLine(text, sender, manual: false, roll, line.At);
+            // Every dealer speech line and every roll feeds the checksum learner, independent of
+            // whatever the dispatch below makes of it. A roll's sender need not be the dealer (some
+            // venues have the acting player roll for themselves).
+            int? rollValue = line.IsRandomRoll ? (roll ?? RollValueFromText(text)) : null;
+            ChatEvent? ev = null;
+            if (rollValue.HasValue || (line.IsSpeech && SenderIsDealer(sender)))
+                ev = RecordEvidence(sender, text, rollValue, line.At);
+
+            HandleLine(text, sender, manual: false, roll, line.At, ev);
+        }
+
+        // Builds this line's wording template against the names currently known (roster, the local
+        // player, and the dealer), records it into the evidence ring, and feeds the roll-group
+        // tracker — closing a group, if this line closes one, into the hypothesis engine.
+        private ChatEvent RecordEvidence(string sender, string text, int? rollValue, DateTime at)
+        {
+            string canon = LineTemplate.Canon(text);
+            string? template = null, subject = null;
+            if (!rollValue.HasValue)
+            {
+                var known = KnownNameCanonForms();
+                var (tpl, slots) = LineTemplate.Templatize(canon, known);
+                template = tpl;
+                var kinds = LineTemplate.SlotKinds(tpl);
+                for (int i = 0; i < kinds.Count; i++)
+                    if (kinds[i]) { subject = slots[i]; break; }
+            }
+
+            var ev = evidence.Record(at, sender, text, canon, rollValue, template, subject);
+            string dealerScope = ChatText.CleanName(Dealer());
+            RollGroup? closed = rollValue.HasValue ? rollGroups.OnRoll(evidence, ev) : rollGroups.OnDealerLine(ev);
+            if (closed != null) hypotheses.OnGroupClosed(closed, host.RosterNames, dealerScope);
+            return ev;
+        }
+
+        // The local player plus the roster — every player name this parser can put a canon slot
+        // back into its proper chat rendering for.
+        private List<string> KnownFullNames(string me)
+        {
+            var full = new List<string>();
+            if (!string.IsNullOrEmpty(me)) full.Add(me);
+            full.AddRange(host.RosterNames);
+            return full;
+        }
+
+        // Canonicalized forms (including abbreviations) of every name this parser currently knows,
+        // for Templatize to recognise inside a dealer line's wording.
+        private IEnumerable<string> KnownNameCanonForms()
+        {
+            var full = KnownFullNames(host.LocalPlayerName ?? "");
+            string dealer = Dealer();
+            if (!string.IsNullOrEmpty(dealer)) full.Add(dealer);
+            return full.SelectMany(ChatText.NameForms).Select(LineTemplate.Canon).Distinct();
         }
 
         /// <summary>Re-runs the last line seen through Feed, ignoring the sender lock. Returns
@@ -168,6 +247,20 @@ namespace BlackjackAdvisor.Chat
             yield return $"dealing to='{snap.DealingTo ?? "-"}'  my turn={snap.MyTurn}  "
                 + $"hand={(snap.TotalMode ? $"total {snap.InTotal}" : snap.Hand.Count == 0 ? "-" : string.Concat(snap.Hand.Select(h => h.Rank + " ")))} "
                 + $"up card={(snap.Dealer?.Rank ?? "-")}";
+
+            string dealerScope = ChatText.CleanName(Dealer());
+            var bound = store.ForDealer(dealerScope);
+            yield return $"learned: {bound.Count} bound line(s) for '{dealerScope}'";
+            foreach (var h in hypotheses.StatusLines()) yield return $"  hyp {h}";
+
+            string subjectKey = snap.DealingTo ?? "-";
+            // subjectCards is keyed by roster name when the roster resolved one, else the raw
+            // canon slot text — try both so status has a chance of finding it either way.
+            int? running = subjectKey == "-" ? null
+                : hypotheses.RunningTotal(subjectKey) ?? hypotheses.RunningTotal(LineTemplate.Canon(subjectKey));
+            yield return $"subject='{subjectKey}' running={(running.HasValue ? running.Value.ToString() : "-")}";
+            yield return $"last group: {hypotheses.LastEquation}";
+            if (hypotheses.ValuesLookWrong) yield return "values look wrong: yes";
         }
 
         // Assigns DealingTo and (re)starts its 45s attribution clock. Clearing it (who == null)
@@ -195,7 +288,7 @@ namespace BlackjackAdvisor.Chat
             State.MyTurn = false;
         }
 
-        private void HandleLine(string text, string sender, bool manual, int? roll, DateTime at)
+        private void HandleLine(string text, string sender, bool manual, int? roll, DateTime at, ChatEvent? ev = null)
         {
             var me = host.LocalPlayerName;
             if (string.IsNullOrEmpty(me)) { host.Log("no local player name"); return; }
@@ -212,12 +305,16 @@ namespace BlackjackAdvisor.Chat
 
             if (manual || SenderIsDealer(sender)) ReadHouseRule(text);
 
-            // A new round: everything from the last one is stale, including the up card.
+            // A new round: everything from the last one is stale, including the up card. Marked on
+            // its own evidence event so it is never mistaken for an unclaimed candidate opener —
+            // this recognition runs even under --no-builtins, so it must not leak into the checksum.
             if (RoundStartRx.IsMatch(text) && (manual || SenderIsDealer(sender)))
             {
+                if (ev != null) ev.MatchedRole = TemplateRole.RoundStart;
                 if (splitHands) host.Log("split hands over");
                 splitHands = false;
                 State.ResetForNextRound();
+                hypotheses.ResetForNextRound();
                 dealingToSetAt = null;
                 host.Log("round start");
                 return;
@@ -243,90 +340,105 @@ namespace BlackjackAdvisor.Chat
                 var hit = store.Find(canon, ChatText.CleanName(Dealer()));
                 if (hit is { } h)
                 {
-                    DispatchLearned(h.Line, h.Slots, me, at);
+                    // Slots come back matched against canon (lowercased, punctuation stripped).
+                    // Prefer the exact rendering a known name takes ("Mira K.", not "mira k" —
+                    // canon throws the abbreviation's period away); fall back to a best-effort
+                    // reconstruction of the dealer's own text for names nobody here knows.
+                    var known = KnownFullNames(me);
+                    var slots = h.Slots
+                        .Select(s => ChatText.BestDisplayForm(s, known) ?? LineTemplate.RecoverOriginalCase(text, s))
+                        .ToList();
+                    DispatchLearned(h.Line, slots, me, at, ev);
                     return;
                 }
             }
 
-            // Round start: "Dealing <who>'s Cards" or "Here is your first two Cards <who>!".
-            var deal = DealingRx.Match(text);
-            if (!deal.Success) deal = FirstCardsRx.Match(text);
-            if (deal.Success)
+            // Everything below is a built-in attribution guess — a wording pattern this build
+            // assumes rather than one the dealer taught it — and is skipped entirely under
+            // --no-builtins so a fixture can prove the learned store alone reproduces it.
+            Match prompt = Match.Empty;
+            if (!noBuiltins)
             {
-                if (!manual && !SenderIsDealer(sender)) { host.Log($"deal line from '{sender}' != dealer '{Dealer()}'"); return; }
-                State.MyTurn = false;
-                string who = deal.Groups[1].Value.Trim();
-                string dealingToNow = who.Contains("Dealer", oic) ? "Dealer" : who;
-                SetDealingTo(dealingToNow, at);
-                lastRoleEvent = TemplateRole.DealTo;
-                bool mineDeal = ChatText.NameIs(who, me);
-                // Only clear the hand. The up card is cleared when a new one is coming — the
-                // dealer's own reveal below, or a round start — never because a player was dealt:
-                // a dealer plays out a split by re-running this same line, mid-round.
-                if (mineDeal) State.ClearHand();
-                if (dealingToNow == "Dealer") State.Dealer = null;
-                host.Log($"dealing to {dealingToNow}{(mineDeal ? " (you)" : $", you are {me}")}");
-                return;
-            }
+                // Round start: "Dealing <who>'s Cards" or "Here is your first two Cards <who>!".
+                var deal = DealingRx.Match(text);
+                if (!deal.Success) deal = FirstCardsRx.Match(text);
+                if (deal.Success)
+                {
+                    if (!manual && !SenderIsDealer(sender)) { host.Log($"deal line from '{sender}' != dealer '{Dealer()}'"); return; }
+                    State.MyTurn = false;
+                    string who = deal.Groups[1].Value.Trim();
+                    string dealingToNow = who.Contains("Dealer", oic) ? "Dealer" : who;
+                    SetDealingTo(dealingToNow, at);
+                    lastRoleEvent = TemplateRole.DealTo;
+                    bool mineDeal = ChatText.NameIs(who, me);
+                    // Only clear the hand. The up card is cleared when a new one is coming — the
+                    // dealer's own reveal below, or a round start — never because a player was dealt:
+                    // a dealer plays out a split by re-running this same line, mid-round.
+                    if (mineDeal) State.ClearHand();
+                    if (dealingToNow == "Dealer") State.Dealer = null;
+                    host.Log($"dealing to {dealingToNow}{(mineDeal ? " (you)" : $", you are {me}")}");
+                    return;
+                }
 
-            // The dealer's own card is drawn next; a first-card reveal starts a fresh up card.
-            var reveal = RevealRx.Match(text);
-            if (reveal.Success)
-            {
-                if (!manual && !SenderIsDealer(sender)) return;
-                State.MyTurn = false;
-                SetDealingTo("Dealer", at);
-                bool first = reveal.Groups[1].Value.Equals("first", oic);
-                if (first) State.Dealer = null;
-                lastRoleEvent = first ? TemplateRole.DealerFirst : TemplateRole.DealerNext;
-                host.Log("dealer reveal");
-                return;
-            }
+                // The dealer's own card is drawn next; a first-card reveal starts a fresh up card.
+                var reveal = RevealRx.Match(text);
+                if (reveal.Success)
+                {
+                    if (!manual && !SenderIsDealer(sender)) return;
+                    State.MyTurn = false;
+                    SetDealingTo("Dealer", at);
+                    bool first = reveal.Groups[1].Value.Equals("first", oic);
+                    if (first) State.Dealer = null;
+                    lastRoleEvent = first ? TemplateRole.DealerFirst : TemplateRole.DealerNext;
+                    host.Log("dealer reveal");
+                    return;
+                }
 
-            // Turn header: capture the dealer's up-card draw; stop previewing on player turns.
-            if (!mentionsHand && text.Contains("Turn", oic))
-            {
-                bool dealerTurn = text.Contains("Dealer", oic);
-                bool myTurnNow = !dealerTurn && ChatText.NameMentioned(text, me);
-                string? dealingToNow = dealerTurn ? "Dealer" : null;
-                State.MyTurn = myTurnNow;
-                SetDealingTo(dealingToNow, at);
-                host.Log($"turn -> myTurn={myTurnNow}, dealingTo={dealingToNow ?? "-"}");
-                return;
-            }
+                // Turn header: capture the dealer's up-card draw; stop previewing on player turns.
+                if (!mentionsHand && text.Contains("Turn", oic))
+                {
+                    bool dealerTurn = text.Contains("Dealer", oic);
+                    bool myTurnNow = !dealerTurn && ChatText.NameMentioned(text, me);
+                    string? dealingToNow = dealerTurn ? "Dealer" : null;
+                    State.MyTurn = myTurnNow;
+                    SetDealingTo(dealingToNow, at);
+                    host.Log($"turn -> myTurn={myTurnNow}, dealingTo={dealingToNow ?? "-"}");
+                    return;
+                }
 
-            // A hand is over, so nobody draws until the next player is prompted.
-            if (text.Contains("stays with", oic) || text.Contains("busted", oic)
-                || text.Contains("got a blackjack", oic) || text.Contains("has a blackjack", oic))
-            {
-                SetDealingTo(null, at);
-                State.MyTurn = false;
-                return;
-            }
+                // A hand is over, so nobody draws until the next player is prompted.
+                if (text.Contains("stays with", oic) || text.Contains("busted", oic)
+                    || text.Contains("got a blackjack", oic) || text.Contains("has a blackjack", oic))
+                {
+                    SetDealingTo(null, at);
+                    State.MyTurn = false;
+                    return;
+                }
 
-            // "<who> chooses to Hit!" — that player receives the cards drawn next.
-            var act = ActionRx.Match(text);
-            if (act.Success && (manual || SenderIsDealer(sender)))
-            {
-                string who = act.Groups[1].Value.Trim();
-                bool ended = act.Groups[2].Value.StartsWith("stand", oic);
-                string? dealingToNow = ended ? null : who;
-                bool myTurnNow = !ended && ChatText.NameIs(who, me);
-                SetDealingTo(dealingToNow, at);
-                State.MyTurn = myTurnNow;
-                lastRoleEvent = ended ? TemplateRole.EndTurn : TemplateRole.Acting;
-                host.Log($"{who} -> {act.Groups[2].Value}, myTurn={myTurnNow}");
-                return;
-            }
+                // "<who> chooses to Hit!" — that player receives the cards drawn next.
+                var act = ActionRx.Match(text);
+                if (act.Success && (manual || SenderIsDealer(sender)))
+                {
+                    string who = act.Groups[1].Value.Trim();
+                    bool ended = act.Groups[2].Value.StartsWith("stand", oic);
+                    string? dealingToNow = ended ? null : who;
+                    bool myTurnNow = !ended && ChatText.NameIs(who, me);
+                    SetDealingTo(dealingToNow, at);
+                    State.MyTurn = myTurnNow;
+                    lastRoleEvent = ended ? TemplateRole.EndTurn : TemplateRole.Acting;
+                    host.Log($"{who} -> {act.Groups[2].Value}, myTurn={myTurnNow}");
+                    return;
+                }
 
-            // "<who>, would you like to hit, stand or double down?" — same, plus it may carry the hand.
-            var prompt = NamePrefixRx.Match(text);
-            if (prompt.Success && (manual || SenderIsDealer(sender)))
-            {
-                string who = prompt.Groups[1].Value.Trim();
-                SetDealingTo(who, at);
-                State.MyTurn = ChatText.NameIs(who, me);
-                lastRoleEvent = TemplateRole.Acting;
+                // "<who>, would you like to hit, stand or double down?" — same, plus it may carry the hand.
+                prompt = NamePrefixRx.Match(text);
+                if (prompt.Success && (manual || SenderIsDealer(sender)))
+                {
+                    string who = prompt.Groups[1].Value.Trim();
+                    SetDealingTo(who, at);
+                    State.MyTurn = ChatText.NameIs(who, me);
+                    lastRoleEvent = TemplateRole.Acting;
+                }
             }
 
             var dealingTo = State.DealingTo;
@@ -383,6 +495,8 @@ namespace BlackjackAdvisor.Chat
                 }
             }
 
+            if (noBuiltins) return;
+
             // Preview fallback: "<me>'s hand is N" summary (used only if no cards were captured).
             if (mentionsHand && !text.Contains("your hand", oic))
             {
@@ -420,7 +534,7 @@ namespace BlackjackAdvisor.Chat
 
         // Dispatches a matched learned template. Learned bindings outrank every built-in and an
         // Ignore binding is a veto: the caller returns unconditionally on any store hit.
-        private void DispatchLearned(LearnedLine line, IReadOnlyList<string> slots, string me, DateTime at)
+        private void DispatchLearned(LearnedLine line, IReadOnlyList<string> slots, string me, DateTime at, ChatEvent? ev)
         {
             var roleOpt = RoleIds.Parse(line.Role);
             if (roleOpt is null) host.Log($"learned line '{line.Template}' has unknown role '{line.Role}' -> treated as ignore");
@@ -435,12 +549,11 @@ namespace BlackjackAdvisor.Chat
                     subject = slots.Count > 0 ? slots[0] : "-";
                     State.MyTurn = false;
                     SetDealingTo(subject, at);
-                    bool mine = ChatText.NameIs(subject, me);
-                    if (mine) State.ClearHand();
-                    // Some venues reveal the dealer's card before naming who is dealt to next; do
-                    // not blow away an up card that was only just set.
-                    if (mine && lastRoleEvent is not (TemplateRole.DealerFirst or TemplateRole.DealerNext))
-                        State.Dealer = null;
+                    // Only clear the hand. The up card is cleared when a new one is coming — the
+                    // dealer's own reveal, or a round start — never because a player was dealt:
+                    // a dealer plays out a split by re-running this same line, mid-round. Mirrors
+                    // the built-in deal path exactly.
+                    if (ChatText.NameIs(subject, me)) State.ClearHand();
                     break;
                 }
                 case TemplateRole.DealerFirst:
@@ -481,6 +594,7 @@ namespace BlackjackAdvisor.Chat
                     if (splitHands) host.Log("split hands over");
                     splitHands = false;
                     State.ResetForNextRound();
+                    hypotheses.ResetForNextRound();
                     dealingToSetAt = null;
                     break;
                 case TemplateRole.Ignore:
@@ -489,6 +603,13 @@ namespace BlackjackAdvisor.Chat
             }
 
             lastRoleEvent = role;
+            // The four checksum roles must stay eligible candidate openers even once bound — the
+            // learner re-verifies a bound line's arithmetic on every later occurrence,
+            // which needs its own group to still resolve an Opener for it. Only the roles outside
+            // the checksum's four (EndTurn, Total, RoundStart, Ignore) are ever "explained" here.
+            if (ev != null && role is not (TemplateRole.DealTo or TemplateRole.DealerFirst
+                or TemplateRole.DealerNext or TemplateRole.Acting))
+                ev.MatchedRole = role;
             host.Log($"learned {RoleIds.Id(role)} '{line.Template}' -> {subject}");
         }
 
@@ -650,7 +771,7 @@ namespace BlackjackAdvisor.Chat
         }
 
         // A /random 1-13 draw -> card rank (1=A, 11/12/13 = J/Q/K, all worth 10).
-        private static string RankFromRandom(int n) => n switch
+        internal static string RankFromRandom(int n) => n switch
         {
             1 => "A",
             11 => "J",
@@ -659,5 +780,23 @@ namespace BlackjackAdvisor.Chat
             10 => "10",
             _ => (n >= 2 && n <= 9) ? n.ToString() : "10",
         };
+
+        /// <summary>Whether a dealer line announces a hand's outcome the checksum can close a roll
+        /// group against: a natural blackjack (always 21), a bust (no total), or a bare total.
+        /// Independent of whose turn is tracked — this is chat-format recognition, not a venue's
+        /// wording, so it runs the same with or without --no-builtins.</summary>
+        internal static (int? Total, bool Bust, string Shape) ReadTotalOrOutcome(string text)
+        {
+            if (OutcomeBlackjackRx.IsMatch(text)) return (21, false, "blackjack");
+            if (OutcomeBustRx.IsMatch(text)) return (null, true, "bust");
+            var bare = BareTotalRx.Match(text);
+            if (bare.Success)
+            {
+                bool soft = bare.Groups[4].Success;
+                int n = int.Parse(soft ? bare.Groups[4].Value : bare.Groups[1].Value);
+                return (n, false, "bare total");
+            }
+            return (null, false, "");
+        }
     }
 }

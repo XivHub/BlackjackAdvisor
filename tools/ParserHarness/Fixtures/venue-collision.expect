@@ -1,0 +1,14 @@
+#me Bram Ostario
+#dealer Table Host
+#roster Nova Kestrel
+#roster Nova Kane
+
+# Nova Kestrel and Nova Kane both abbreviate to "Nova K." — the checksum's arithmetic
+# balances perfectly both times (6+8=14, 9+3=12) but the subject can't be resolved to one roster
+# name, so the equation must be discarded rather than merged into either player's running total.
+# Two occurrences with differing rolls would otherwise be exactly enough to auto-bind.
+
+#at 00:00:05.000 trace=subject_'nova_k'_is_ambiguous_on_this_roster
+#at 00:00:05.000 hand=- up=- total=- mode=cards dealingTo=-
+#at 00:00:14.000 trace=subject_'nova_k'_is_ambiguous_on_this_roster
+#at 00:00:14.000 hand=- up=- total=- mode=cards dealingTo=-

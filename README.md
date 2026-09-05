@@ -38,14 +38,24 @@ and checks it against a sibling `.expect` file:
 DOTNET_ROOT=~/.dotnet dotnet run --project tools/ParserHarness -- tools/ParserHarness/Fixtures/venue-lina.log
 ```
 `--engine-check` additionally links `Strategy/BlackjackEngine.cs` and checks the default rules
-against the known infinite-deck H17 dealer bust rates. `--no-builtins` disables the parser's own
-regex table once a later phase adds a way to do that; it is accepted today but changes nothing yet.
+against the known infinite-deck H17 dealer bust rates. `--no-builtins` disables the attribution
+regexes below the learned-store lookup (deal/reveal/turn/act/prompt), so a fixture can prove the
+checksum learner alone reproduces a venue's hand-filling with zero built-in help. `--dump-trace`
+prints every parser trace line to stderr, prefixed `TRACE <fixture>:` — useful for reading back
+what the learner concluded and why.
 
 Fixtures under `Fixtures/` are anonymized dev-log captures from real venues — every character name
 is replaced before the log is committed, but the abbreviated/cross-world name shapes and the game's
 private-use glyphs (boxed letters, job/world icons) are kept byte-for-byte, since those are exactly
 what the parser is being tested against. `tools/ParserHarness` is never referenced by
 `BlackjackAdvisor.csproj`; it is a standalone offline tool.
+
+A `.expect` file normally shares its capture's name (`venue-lina.log` / `venue-lina.expect`). A
+second `.expect` can replay the SAME capture without duplicating it — point the harness at the
+`.expect` directly and give it a `#log <relative path>` directive naming the capture to replay
+(see `venue-lina.learn.expect`, which replays `venue-lina.log` with `--no-builtins`). `#roster
+<name>` (repeatable) supplies the party roster the checksum learner's name-collision guard
+resolves an abbreviated subject against — in the running plugin this comes from the object table.
 
 ## Needs in-game verification (compiles ≠ works)
 - `IChatGui.ChatMessage` handler fires and `Message.TextValue` contains the card glyphs (♣♠♦♥).
