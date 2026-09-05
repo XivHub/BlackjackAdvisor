@@ -560,6 +560,21 @@ namespace BlackjackAdvisor.Windows
 
         // ---- Chat auto-fill ----------------------------------------------------------
 
+        // Every channel a dealer plausibly speaks a macro on, or a player replies on. Everything
+        // else (buffs, item use, system messages) can show an empty sender next to a bystander's
+        // name and must never reach the learner or the built-in regexes as if it were dealer wording.
+        private static readonly HashSet<XivChatType> SpeechTypes = new()
+        {
+            XivChatType.Say, XivChatType.Shout, XivChatType.TellIncoming, XivChatType.Party,
+            XivChatType.Alliance, XivChatType.Ls1, XivChatType.Ls2, XivChatType.Ls3, XivChatType.Ls4,
+            XivChatType.Ls5, XivChatType.Ls6, XivChatType.Ls7, XivChatType.Ls8,
+            XivChatType.FreeCompany, XivChatType.NoviceNetwork, XivChatType.CustomEmote,
+            XivChatType.StandardEmote, XivChatType.Yell, XivChatType.CrossParty,
+            XivChatType.CrossLinkShell1, XivChatType.CrossLinkShell2, XivChatType.CrossLinkShell3,
+            XivChatType.CrossLinkShell4, XivChatType.CrossLinkShell5, XivChatType.CrossLinkShell6,
+            XivChatType.CrossLinkShell7, XivChatType.CrossLinkShell8, XivChatType.Echo,
+        };
+
         private void OnChatMessage(IHandleableChatMessage handler)
         {
             if (!c.AutoFillFromChat) return;
@@ -573,7 +588,8 @@ namespace BlackjackAdvisor.Windows
             // (last number, fullwidth-normalized for the JP client) rather than trusting localized text.
             int? roll = handler.LogKind == XivChatType.RandomNumber ? ChatParser.LastNumber(text) : null;
 
-            var line = new ChatLine(handler.LogKind.ToString(), sender, text, IsSpeech: false, ChatParser.IsRollText(text));
+            var line = new ChatLine(handler.LogKind.ToString(), sender, text,
+                IsSpeech: SpeechTypes.Contains(handler.LogKind), ChatParser.IsRollText(text), DateTime.Now);
             parser.Feed(line, roll);
         }
 

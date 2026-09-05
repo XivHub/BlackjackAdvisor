@@ -40,6 +40,17 @@ static class FixtureRunner
     private static readonly Regex LineRx = new(
         @"^(\d\d:\d\d:\d\d\.\d\d\d) \[BlackjackAdvisor\] «([^»]*)» \[([^\]]*)\] (.*)$", RegexOptions.Compiled);
 
+    // Mirrors MainWindow's XivChatType allow-list by the chat-type name the capture stores it
+    // under — this tool cannot reference Dalamud, so the check runs on the string form instead.
+    private static readonly HashSet<string> SpeechKinds = new(StringComparer.Ordinal)
+    {
+        "Say", "Shout", "TellIncoming", "Party", "Alliance",
+        "Ls1", "Ls2", "Ls3", "Ls4", "Ls5", "Ls6", "Ls7", "Ls8",
+        "FreeCompany", "NoviceNetwork", "CustomEmote", "StandardEmote", "Yell", "CrossParty",
+        "CrossLinkShell1", "CrossLinkShell2", "CrossLinkShell3", "CrossLinkShell4",
+        "CrossLinkShell5", "CrossLinkShell6", "CrossLinkShell7", "CrossLinkShell8", "Echo",
+    };
+
     public static int Run(string logPath, bool noBuiltins)
     {
         string expectPath = Path.ChangeExtension(logPath, ".expect");
@@ -79,9 +90,9 @@ static class FixtureRunner
 
         if (me == null) { Console.Error.WriteLine($"FAIL {logPath}: .expect has no #me directive"); return 1; }
 
-        // SEAM: --no-builtins is accepted here for Phase 2 onward, once ChatParser can consult the
-        // learned-line store ahead of its built-in regexes and skip them entirely. ChatParser has
-        // no such switch yet, so the flag is a no-op today — flip this seam once it does.
+        // SEAM: --no-builtins is accepted here so a fixture can assert that learned bindings alone
+        // reproduce a venue's hand-filling with the built-in regexes disabled entirely. ChatParser
+        // has no such switch yet, so the flag is a no-op today — flip this seam once it does.
         _ = noBuiltins;
         var host = new HarnessHost { LocalPlayerName = me, ConfiguredDealerName = dealer ?? "" };
         var parser = new ChatParser(host);
@@ -93,7 +104,9 @@ static class FixtureRunner
             {
                 var l = chatLines[fed];
                 bool roll = ChatParser.IsRollText(l.Text);
-                parser.Feed(new ChatLine(l.Kind, l.Sender, l.Text, IsSpeech: true, IsRandomRoll: roll));
+                bool isSpeech = SpeechKinds.Contains(l.Kind);
+                var at = DateTime.ParseExact(l.Time, "HH:mm:ss.fff", CultureInfo.InvariantCulture);
+                parser.Feed(new ChatLine(l.Kind, l.Sender, l.Text, isSpeech, roll, at));
                 fed++;
             }
 

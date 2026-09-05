@@ -40,6 +40,7 @@ namespace BlackjackAdvisor
 
             Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
             Configuration.Initialize(PluginInterface);
+            Configuration.Sanitize();
 
             ThemeConfig = new HubThemeConfigService(
                 PluginInterface.GetPluginConfigDirectory(),
