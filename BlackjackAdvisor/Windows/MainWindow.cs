@@ -35,6 +35,8 @@ namespace BlackjackAdvisor.Windows
         private bool inPair;
 
         // Chat auto-fill state
+        private int? houseStandsOn;     // the draw threshold the dealer announced, if they did
+        private bool houseHitsSoft;     // whether that announcement implies a soft threshold is hit
         private bool filledFromChat;
         private bool myTurn;
         private string? dealerSender;   // auto-locked dealer sender name
@@ -437,6 +439,19 @@ namespace BlackjackAdvisor.Windows
             Help("The total the dealer stops drawing at. 17 is the casino rule; some hosts stop at 16, "
                + "which makes the dealer bust far less often and changes when you should stand.");
 
+            if (AnnouncedHouseRule is { } house)
+            {
+                ImGui.TextColored(HubStyle.Warn,
+                    $"This dealer said they stand on {house.Total}{(house.HitsSoft ? " and hit a soft one" : "")}.");
+                ImGui.SameLine();
+                if (ImGui.Button($"Use {house.Total}##house"))
+                {
+                    c.DealerStandsOn = house.Total;
+                    c.DealerHitsSoft17 = house.HitsSoft;
+                    c.Save();
+                }
+            }
+
             bool h17 = c.DealerHitsSoft17;
             if (ImGui.Checkbox($"Dealer hits soft {c.DealerStandsOn}", ref h17)) { c.DealerHitsSoft17 = h17; c.Save(); }
             ImGui.SameLine();
@@ -591,6 +606,13 @@ namespace BlackjackAdvisor.Windows
         // "<name> rolls a 5" style (some tables/RP dealers).
         private static readonly Regex RollsRx = new(@"\brolls?\s+(?:a\s+)?(\d{1,2})\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex DigitRunRx = new(@"\d+", RegexOptions.Compiled);
+        // Dealers state the house rule in passing: "DEALER is below 16 and rolls again.",
+        // "Dealer stands on 17". Worth reading — the draw threshold moves the advice on every
+        // stiff hand, and it is the one rule a player is least likely to think to ask about.
+        private static readonly Regex HouseDrawsRx = new(
+            @"\bbelow\s+(\d{1,2})\b.{0,20}?\b(?:rolls?|draws?|hits?)\s+again", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex HouseStandsRx = new(
+            @"\bstands?\s+(?:on|at)\s+(?:soft\s+|hard\s+|all\s+)?(\d{1,2})", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex SummaryRx = new(@"([^,]+?)'s\s+hand\s+is\s+(\d{1,2})", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         // The parser trace goes to the dev log whenever one is configured, and to game chat only
@@ -648,6 +670,8 @@ namespace BlackjackAdvisor.Windows
 
             bool mentionsHand = text.Contains("hand", StringComparison.OrdinalIgnoreCase);
             var oic = StringComparison.OrdinalIgnoreCase;
+
+            if (manual || SenderIsDealer(sender)) ReadHouseRule(text);
 
             // Round start: "Dealing <who>'s Cards" or "Here is your first two Cards <who>!".
             var deal = DealingRx.Match(text);
@@ -872,6 +896,28 @@ namespace BlackjackAdvisor.Windows
                 if (ch is < '\uE000' or > '\uF8FF') sb.Append(ch);   // private-use area: world/job icons
             return sb.ToString().Trim(' ', '\t', '!', '?', '*', '=', '-', ',', ':', '★', '☆');
         }
+
+        // "below 16 and rolls again" is a threshold: they draw under it and stand on it, soft or not.
+        // "stands on 17" names the same threshold from the other side.
+        private void ReadHouseRule(string text)
+        {
+            var m = HouseDrawsRx.Match(text);
+            bool hitsSoft = false;
+            if (!m.Success)
+            {
+                m = HouseStandsRx.Match(text);
+                hitsSoft = m.Success && text.Contains("hits soft", StringComparison.OrdinalIgnoreCase);
+            }
+            if (!m.Success || !int.TryParse(m.Groups[1].Value, out int n) || n is < 12 or > 21) return;
+            if (houseStandsOn == n && houseHitsSoft == hitsSoft) return;
+            houseStandsOn = n;
+            houseHitsSoft = hitsSoft;
+            Dbg($"house rule announced: stands on {n}{(hitsSoft ? ", hits soft" : "")}");
+        }
+
+        public (int Total, bool HitsSoft)? AnnouncedHouseRule =>
+            houseStandsOn is { } n && (n != c.DealerStandsOn || houseHitsSoft != c.DealerHitsSoft17)
+                ? (n, houseHitsSoft) : null;
 
         private string Dealer() => !string.IsNullOrWhiteSpace(c.DealerName) ? c.DealerName : dealerSender ?? "";
 
