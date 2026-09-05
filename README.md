@@ -34,5 +34,5 @@ Deploy: bump `<Version>`, then `publish-plugin` (or `./publish.sh`). Command: `/
 
 ## Auto-fill limitation
 If a dealer prints neither turn headers (`... 's Turn ...`) nor name-prefixed hand lines
-(`<Name>, your hand is ...`), a generic "Your Hand is:" line can't be attributed to you, so it
-won't auto-fill. Manual entry always works. See `chat-samples.md` for the formats handled.
+(`<Name>, your hand is ...` / `<Name>, would you like to ...`) nor per-player deal lines, a generic
+"Your Hand is:" line can't be attributed to you, so it won't auto-fill. Manual entry always works. See `chat-samples.md` for the formats handled.

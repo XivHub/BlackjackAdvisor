@@ -533,9 +533,24 @@ namespace BlackjackAdvisor.Windows
         private static readonly Regex TotalKwRx = new(@"total[\s:]*(\d{1,2})", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex HandNumRx = new(@"(?:hand(?:\s+is)?|have)[\s:]*(\d{1,2})", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex DealerTokenRx = new(@"([♣♠♦♥])\s*(10|[2-9]|[TtAaJjQqKk])|(10|[2-9]|[TtAaJjQqKk])\s*([♣♠♦♥])|\b(10|[2-9]|[TtAaJjQqKk])\b", RegexOptions.Compiled);
-        private static readonly Regex NamePrefixRx = new(@"^\s*([^,]+?),\s*your\s+hand", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        // The dealer addresses one player: "<name>, your hand is ..." / "<name>, would you like to ...".
+        private static readonly Regex NamePrefixRx = new(
+            @"^\s*([^,]+?),\s*(?:your\s+hand|would\s+you\s+like|what\s+would\s+you\s+like|do\s+you\s+want)",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex TurnRx = new(@"'s Turn", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex DealingRx = new(@"Dealing\s+(.+?)'s\s+Cards", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        // "Here is your first two Cards <name>!" — the name trails the line instead of taking a possessive.
+        private static readonly Regex FirstCardsRx = new(@"\bfirst\s+two\s+cards?\b[:\s]*(.+?)[\s!?]*$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        // "Time to reveal the Dealer's first Card!" — some macros drop the name ("the 's first Card").
+        private static readonly Regex RevealRx = new(@"\breveal\b[^.!?]*?\b(first|second|next)\s+card", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        // "<name> chooses to Double Down!" / "<name> is forced to Stand!"
+        private static readonly Regex ActionRx = new(
+            @"^\s*(.+?)\s+(?:chooses|choose|decides|opts|wants|is\s+forced)\s+to\s+(hit|stand|double|split)",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        // A hand announced as a number on its own line: "15", "1 or 11", "Blackjack 16".
+        private static readonly Regex BareTotalRx = new(
+            @"^[\s\-–—]*(?:blackjack|total|score|hand)?[\s:!.]*(\d{1,2})(?:\s*or\s*(\d{1,2}))?\s*[.!]*$",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
         // A /random result: "(1-13) 9", tolerant of locale prefix (Random!/Würfeln!), en/em dashes and spacing.
         private static readonly Regex RandomRx = new(@"\(\s*\d{1,2}\s*[-–—]\s*\d{1,2}\s*\)\s*(\d{1,2})", RegexOptions.Compiled);
         // "<name> rolls a 5" style (some tables/RP dealers).
@@ -586,16 +601,29 @@ namespace BlackjackAdvisor.Windows
             bool mentionsHand = text.Contains("hand", StringComparison.OrdinalIgnoreCase);
             var oic = StringComparison.OrdinalIgnoreCase;
 
-            // "Dealing <who>'s Cards" -> new round; start previewing if it's my deal.
+            // Round start: "Dealing <who>'s Cards" or "Here is your first two Cards <who>!".
             var deal = DealingRx.Match(text);
+            if (!deal.Success) deal = FirstCardsRx.Match(text);
             if (deal.Success)
             {
                 if (!manual && !SenderIsDealer(sender)) return;
                 myTurn = false;
                 string who = deal.Groups[1].Value.Trim();
                 dealingTo = who.Contains("Dealer", oic) ? "Dealer" : who;
-                if (dealingTo.Equals(me, oic)) { hand.Clear(); dealer = null; totalMode = false; filledFromChat = false; }
+                if (NameIs(who, me)) { hand.Clear(); dealer = null; totalMode = false; filledFromChat = false; }
                 Dbg($"dealing to {dealingTo}");
+                return;
+            }
+
+            // The dealer's own card is drawn next; a first-card reveal starts a fresh up card.
+            var reveal = RevealRx.Match(text);
+            if (reveal.Success)
+            {
+                if (!manual && !SenderIsDealer(sender)) return;
+                myTurn = false;
+                dealingTo = "Dealer";
+                if (reveal.Groups[1].Value.Equals("first", oic)) dealer = null;
+                Dbg("dealer reveal");
                 return;
             }
 
@@ -609,24 +637,63 @@ namespace BlackjackAdvisor.Windows
                 return;
             }
 
-            // Preview: a /random draw during dealing. Prefer the chat-type value, then text fallbacks.
+            // A hand is over, so nobody draws until the next player is prompted.
+            if (text.Contains("stays with", oic) || text.Contains("busted", oic))
+            {
+                dealingTo = null;
+                myTurn = false;
+                return;
+            }
+
+            // "<who> chooses to Hit!" — that player receives the cards drawn next.
+            var act = ActionRx.Match(text);
+            if (act.Success && (manual || SenderIsDealer(sender)))
+            {
+                string who = act.Groups[1].Value.Trim();
+                bool ended = act.Groups[2].Value.StartsWith("stand", oic);
+                dealingTo = ended ? null : who;
+                myTurn = !ended && NameIs(who, me);
+                Dbg($"{who} -> {act.Groups[2].Value}, myTurn={myTurn}");
+                return;
+            }
+
+            // "<who>, would you like to hit, stand or double down?" — same, plus it may carry the hand.
+            var prompt = NamePrefixRx.Match(text);
+            if (prompt.Success && (manual || SenderIsDealer(sender)))
+            {
+                string who = prompt.Groups[1].Value.Trim();
+                dealingTo = who;
+                myTurn = NameIs(who, me);
+            }
+
             if (dealingTo != null)
             {
+                // Preview: a /random draw. Prefer the chat-type value, then text fallbacks.
                 int? rv = roll ?? RollValueFromText(text);
                 if (rv is >= 1 and <= 13)
                 {
                     if (!manual && !SenderIsDealer(sender)) return;
-                    if (dealingTo.Equals(me, oic))
+                    if (NameIs(dealingTo, me))
                     {
                         hand.Add(new Card(RankFromRandom(rv.Value), Suits[hand.Count % 4]));
                         totalMode = false; filledFromChat = true;
                         Dbg($"preview draw {RankFromRandom(rv.Value)}");
                     }
-                    else if (dealingTo == "Dealer")
+                    // The up card is the dealer's first draw; later ones are the reveal, not the up card.
+                    else if (dealingTo == "Dealer" && dealer == null)
                     {
                         dealer = new Card(RankFromRandom(rv.Value), '♠');
                         Dbg($"dealer up {dealer.Value.Rank}");
                     }
+                    return;
+                }
+
+                // Bare number announcing the hand just dealt ("15", "1 or 11").
+                var bare = BareTotalRx.Match(text);
+                if (bare.Success)
+                {
+                    if (!manual && !SenderIsDealer(sender)) return;
+                    ApplyBareTotal(bare, me);
                     return;
                 }
             }
@@ -635,7 +702,7 @@ namespace BlackjackAdvisor.Windows
             if (mentionsHand && !text.Contains("your hand", oic))
             {
                 var sum = SummaryRx.Match(text);
-                if (sum.Success && sum.Groups[1].Value.Trim().Equals(me, oic))
+                if (sum.Success && NameIs(sum.Groups[1].Value, me))
                 {
                     if (!manual && !SenderIsDealer(sender)) return;
                     if (hand.Count == 0 && int.TryParse(sum.Groups[2].Value, out int tn) && tn is >= 2 and <= 21)
@@ -648,13 +715,9 @@ namespace BlackjackAdvisor.Windows
                 }
             }
 
-            if (text.Contains("stays with", StringComparison.OrdinalIgnoreCase) ||
-                text.Contains("busted", StringComparison.OrdinalIgnoreCase)) return;
-
             // Hand-line trigger: literal "your hand", or the decision prompt.
-            bool handLine = text.Contains("your hand", StringComparison.OrdinalIgnoreCase)
-                            || (text.Contains("hit", StringComparison.OrdinalIgnoreCase)
-                                && text.Contains("stand", StringComparison.OrdinalIgnoreCase));
+            bool handLine = text.Contains("your hand", oic)
+                            || (text.Contains("hit", oic) && text.Contains("stand", oic));
             if (!handLine) return;
 
             // Sender must be the dealer (auto-locked or configured), unless forced.
@@ -665,12 +728,55 @@ namespace BlackjackAdvisor.Windows
             }
 
             // Ownership: name prefix wins, else current turn.
-            var nm = NamePrefixRx.Match(text);
-            bool mine = manual
-                || (nm.Success ? nm.Groups[1].Value.Trim().Equals(me, StringComparison.OrdinalIgnoreCase) : myTurn);
+            bool mine = manual || (prompt.Success ? NameIs(prompt.Groups[1].Value, me) : myTurn);
             if (!mine) { Dbg("skip: not my hand"); return; }
 
             ParseAndFill(text);
+        }
+
+        // A dealer that prints a hand as a bare number on the line after the draws. The announced
+        // total is authoritative: cards that disagree with it mean a draw line was missed.
+        private void ApplyBareTotal(Match m, string me)
+        {
+            bool soft = m.Groups[2].Success;
+            int n = int.Parse(soft ? m.Groups[2].Value : m.Groups[1].Value);
+
+            if (dealingTo == "Dealer")
+            {
+                if (dealer == null && n is >= 1 and <= 11)
+                {
+                    dealer = new Card(n is 1 or 11 ? "A" : n.ToString(), '♠');
+                    Dbg($"dealer up {dealer.Value.Rank} (announced)");
+                }
+                return;
+            }
+
+            if (dealingTo == null || !NameIs(dealingTo, me) || n is < 2 or > 21) return;
+
+            if (hand.Count > 0)
+            {
+                int high = HandTotal(hand, out bool isSoft);
+                if (n == high || n == (isSoft ? high - 10 : high)) return;
+                Dbg($"cards total {high}, dealer said {n} -> total mode");
+            }
+            inTotal = n; inSoft = soft; inPair = false;
+            totalMode = true; filledFromChat = true;
+        }
+
+        // Chat renders a cross-world player as "<name><world icon><World>" while the object table
+        // holds only the character name, so the local player is identified by the leading name.
+        private static bool NameIs(string candidate, string me)
+        {
+            candidate = CleanName(candidate);
+            return candidate.Length > 0 && candidate.StartsWith(me, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static string CleanName(string s)
+        {
+            var sb = new System.Text.StringBuilder(s.Length);
+            foreach (char ch in s)
+                if (ch is < '\uE000' or > '\uF8FF') sb.Append(ch);   // private-use area: world/job icons
+            return sb.ToString().Trim(' ', '\t', '!', '?', '*', '=', '-', ',', ':', '★', '☆');
         }
 
         private string Dealer() => !string.IsNullOrWhiteSpace(c.DealerName) ? c.DealerName : dealerSender ?? "";

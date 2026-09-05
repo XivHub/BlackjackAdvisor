@@ -40,3 +40,43 @@ Au Tism busted with: ♣3♦A♠8♠3♣9 - Total: 24.
 Dealer's hand is 3.
 Dealer's hand is 1 or 11.
 ```
+
+## Cardless dealer (no glyphs — rolls, then a bare total)
+
+This host announces each hand as `Random! (1-13) N` draws followed by the total on its own line,
+never printing card glyphs, and its "reveal" macro leaves the dealer's name out entirely.
+
+```
+ Here is your first two Cards Lielle C.Shiva!
+Random! (1-13) 6
+Random! (1-13) 9
+ -------------------------------------------------------
+15
+ Here is your first two Cards Hina R.!
+Random! (1-13) 8
+Random! (1-13) 12
+18
+ Time to reveal the 's first Card!
+Random! (1-13) 9
+9
+ Lielle C.Shiva chooses to Double Down!
+ Doubling Down Now!
+Random! (1-13) 5
+ Lielle C.Shiva is forced to Stand!
+20
+ Hina R., would you like to Hit, Stand or Double Down?
+ Time to reveal the 's second Card!
+Random! (1-13) 11
+19
+```
+
+Parsing notes:
+- The name trails the deal line (`... Cards <name>!`) instead of taking a possessive.
+- A cross-world player appears as `Lielle C.Shiva` (name + world icon + world), so the local
+  player is matched on the leading name, not on equality.
+- `reveal ... first/second Card` is the only marker for the dealer's own draws; the up card is
+  the first of them, so later draws never replace it.
+- `<name> chooses to Hit` / `is forced to Stand` and the `<name>, would you like to ...` prompt
+  say who the next `Random!` belongs to.
+- A bare total line (`18`, `1 or 11`, `Blackjack 16`) fills the hand when the draws were missed,
+  and overrides parsed cards when it disagrees with them.
