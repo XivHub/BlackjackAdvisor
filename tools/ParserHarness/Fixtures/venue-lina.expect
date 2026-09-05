@@ -1,0 +1,54 @@
+#me Mira Kaine
+
+# Lielle's hand — renamed Miri C.Shiva — is dealt first and is not the local player's. The
+# parser must recognise that and leave the local hand untouched.
+#at 21:36:56.601 hand=- up=- total=- mode=cards dealingTo=Miri_C.Shiva
+#at 21:37:01.350 hand=- up=- total=- mode=cards dealingTo=Miri_C.Shiva
+
+# Round 1: the abbreviated sender "Mira K." matched against the full name "Mira Kaine"; the
+# announced total ("15") agreeing with the two cards already drawn; the dealer's reveal line
+# written in the game's boxed letters (U+E071-U+E08A spelling "DEALER"), including the house
+# rule announced the same way; the dealer's own further draws never touching a set up card.
+#at 21:37:05.886 hand=J,5 up=- total=- mode=cards
+#at 21:37:08.878 hand=J,5 up=- total=- mode=cards
+#at 21:37:11.730 hand=J,5 up=5 total=- mode=cards dealingTo=Dealer
+#at 21:37:59.987 hand=J,5 up=5 total=- mode=cards
+#at 21:38:00.943 hand=J,5 up=5 total=- mode=cards
+#at 21:38:26.227 hand=- up=- total=- mode=cards dealingTo=-
+
+# Round 2: a bare total naming the pair on offer ("14 or 7/7 splits") when the player does not
+# actually split — the hit that follows still lands on the two cards already dealt, not a
+# fresh hand.
+#at 21:39:14.454 hand=7,7 up=- total=- mode=cards
+#at 21:39:16.990 hand=- up=- total=14 mode=total pair=true
+#at 21:39:36.683 hand=7,7,8 up=9 total=- mode=cards
+#at 21:39:38.725 hand=7,7,8 up=9 total=- mode=cards dealingTo=-
+
+# Round 3: a natural blackjack from two rolls alone, no announced total at all. This dealer's
+# macro never reveals its own card this round, so the up card correctly stays unset rather
+# than being guessed at.
+#at 21:42:05.524 hand=Q,A up=- total=- mode=cards
+#at 21:42:08.066 hand=Q,A up=- total=- mode=cards dealingTo=-
+#at 21:42:22.854 hand=- up=- total=- mode=cards dealingTo=-
+
+# Round 4: the announced total agrees without an explicit "chooses to Stand!" line ever
+# appearing; the up card survives the dealer's second reveal untouched.
+#at 21:48:24.034 hand=9,J up=- total=- mode=cards
+#at 21:48:25.356 hand=9,J up=- total=- mode=cards
+#at 21:48:27.671 hand=9,J up=8 total=- mode=cards dealingTo=Dealer
+#at 21:48:35.427 hand=9,J up=8 total=- mode=cards dealingTo=Dealer
+#at 21:48:40.544 hand=- up=- total=- mode=cards dealingTo=-
+
+# Split round (the newest behaviour): two cards, then a pair-split offer ("12 or 6/6 split"),
+# then the dealer actually splitting the hand — signalled by two totals on one line
+# ("13 - 9"), which cards belong to which hand no longer being recoverable. From there,
+# auto-fill turns off and the up card is retained, through the rest of the round including
+# the dealer's second reveal, until the round-end line resets everything.
+#at 22:15:46.392 hand=6,6 up=- total=- mode=cards split=false
+#at 22:15:50.453 hand=- up=- total=12 mode=total pair=true split=false
+#at 22:15:54.100 hand=- up=6 total=12 mode=total split=false
+#at 22:17:16.394 hand=7,3 up=6 total=- mode=cards split=false
+#at 22:17:19.538 hand=- up=6 total=- mode=cards split=true
+#at 22:17:59.493 hand=- up=6 total=- mode=cards split=true dealingTo=Mira_K.
+#at 22:18:16.187 hand=- up=6 total=- mode=cards split=true dealingTo=Dealer
+#at 22:18:21.612 hand=- up=- total=- mode=cards split=false dealingTo=-

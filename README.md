@@ -31,6 +31,22 @@ Turning on "Send the parser trace to a dev log" in Rules and pointing it at
 saw and what it made of it, so a whole table can be read back afterwards instead of scrolled through
 in game chat. It stays dormant with no URL set.
 
+### Parser harness
+`tools/ParserHarness` replays a captured dev log through the real `Chat/` parser, outside Dalamud,
+and checks it against a sibling `.expect` file:
+```
+DOTNET_ROOT=~/.dotnet dotnet run --project tools/ParserHarness -- tools/ParserHarness/Fixtures/venue-lina.log
+```
+`--engine-check` additionally links `Strategy/BlackjackEngine.cs` and checks the default rules
+against the known infinite-deck H17 dealer bust rates. `--no-builtins` disables the parser's own
+regex table once a later phase adds a way to do that; it is accepted today but changes nothing yet.
+
+Fixtures under `Fixtures/` are anonymized dev-log captures from real venues — every character name
+is replaced before the log is committed, but the abbreviated/cross-world name shapes and the game's
+private-use glyphs (boxed letters, job/world icons) are kept byte-for-byte, since those are exactly
+what the parser is being tested against. `tools/ParserHarness` is never referenced by
+`BlackjackAdvisor.csproj`; it is a standalone offline tool.
+
 ## Needs in-game verification (compiles ≠ works)
 - `IChatGui.ChatMessage` handler fires and `Message.TextValue` contains the card glyphs (♣♠♦♥).
 - Chat auto-fill: ownership gating (turn header / name-prefix vs `ObjectTable.LocalPlayer.Name`),

@@ -1,0 +1,655 @@
+21:36:37.743 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:36:38.752 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:36:39.745 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:36:40.741 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:36:40.937 [BlackjackAdvisor] «Say» [Nadia L.Phoenix] Hi Rowan ♥
+21:36:41.741 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:36:42.747 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:36:42.766 [BlackjackAdvisor] «Say» [Vela L.Phoenix] Hi Rowan ♥
+21:36:43.553 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] weird
+21:36:43.755 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:36:44.754 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:36:45.755 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:36:46.376 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] i will check later
+21:36:46.770 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:36:47.763 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:36:48.759 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:36:49.763 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:36:50.762 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:36:51.763 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:36:52.760 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:36:53.768 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:36:53.959 [BlackjackAdvisor] «Action» [] Ayla C.Odin uses The Spear.
+21:36:53.990 [BlackjackAdvisor] «GainBuff» []    Miri C.Shiva gains the effect of The Spear.
+21:36:54.422 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  Here is your first two Cards Miri C.Shiva!
+21:36:54.427 [BlackjackAdvisor] dealing to Miri C.Shiva
+21:36:54.760 [BlackjackAdvisor] you=- up=- dealingTo=Miri C.Shiva myTurn=False filled=False best=-
+21:36:55.074 [BlackjackAdvisor] «Party» [DNC Miri C.Shiva] crazy
+21:36:55.512 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Random! (1-13) 6
+21:36:55.767 [BlackjackAdvisor] you=- up=- dealingTo=Miri C.Shiva myTurn=False filled=False best=-
+21:36:56.601 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Random! (1-13) 10
+21:36:56.757 [BlackjackAdvisor] you=- up=- dealingTo=Miri C.Shiva myTurn=False filled=False best=-
+21:36:57.703 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  -------------------------------------------------------
+21:36:57.762 [BlackjackAdvisor] you=- up=- dealingTo=Miri C.Shiva myTurn=False filled=False best=-
+21:36:58.759 [BlackjackAdvisor] you=- up=- dealingTo=Miri C.Shiva myTurn=False filled=False best=-
+21:36:59.701 [BlackjackAdvisor] «Item» [] Tam G.Shiva readies a bottle of Realm Reborn red.
+21:36:59.769 [BlackjackAdvisor] you=- up=- dealingTo=Miri C.Shiva myTurn=False filled=False best=-
+21:37:00.758 [BlackjackAdvisor] you=- up=- dealingTo=Miri C.Shiva myTurn=False filled=False best=-
+21:37:01.350 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] 16
+21:37:01.754 [BlackjackAdvisor] you=- up=- dealingTo=Miri C.Shiva myTurn=False filled=False best=-
+21:37:02.765 [BlackjackAdvisor] you=- up=- dealingTo=Miri C.Shiva myTurn=False filled=False best=-
+21:37:02.929 [BlackjackAdvisor] «Item» [] Tam G.Shiva uses a bottle of Realm Reborn red.
+21:37:03.413 [BlackjackAdvisor] «Action» [] Ayla C.Odin uses The Bole.
+21:37:03.445 [BlackjackAdvisor] «GainBuff» []    Mira K. gains the effect of The Bole.
+21:37:03.728 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  Here is your first two Cards Mira K.!
+21:37:03.728 [BlackjackAdvisor] dealing to Mira K.
+21:37:03.757 [BlackjackAdvisor] you=- up=- dealingTo=Mira K. myTurn=False filled=False best=-
+21:37:04.261 [BlackjackAdvisor] «Party» [DNC Miri C.Shiva] h
+21:37:04.768 [BlackjackAdvisor] you=- up=- dealingTo=Mira K. myTurn=False filled=False best=-
+21:37:04.801 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Random! (1-13) 11
+21:37:05.761 [BlackjackAdvisor] you=- up=- dealingTo=Mira K. myTurn=False filled=False best=-
+21:37:05.886 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Random! (1-13) 5
+21:37:06.759 [BlackjackAdvisor] you=- up=- dealingTo=Mira K. myTurn=False filled=False best=-
+21:37:06.851 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  -------------------------------------------------------
+21:37:07.767 [BlackjackAdvisor] you=- up=- dealingTo=Mira K. myTurn=False filled=False best=-
+21:37:08.758 [BlackjackAdvisor] you=- up=- dealingTo=Mira K. myTurn=False filled=False best=-
+21:37:08.878 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] 15
+21:37:09.024 [BlackjackAdvisor] «LoseBuff» [] Miri C.Shiva loses the effect of The Spear.
+21:37:09.649 [BlackjackAdvisor] «Action» [] Ayla C.Odin uses Lady of Crowns.
+21:37:09.649 [BlackjackAdvisor] «Healing» []    Ayla C.Odin recovers 23813 HP.
+21:37:09.759 [BlackjackAdvisor] you=- up=- dealingTo=Mira K. myTurn=False filled=False best=-
+21:37:09.771 [BlackjackAdvisor] «Healing» []    Miri C.Shiva recovers 23880 HP.
+21:37:09.905 [BlackjackAdvisor] «Healing» []    Mira K. recovers 23635 HP.
+21:37:10.688 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  Time to reveal the 's first Card!
+21:37:10.690 [BlackjackAdvisor] dealer reveal
+21:37:10.766 [BlackjackAdvisor] you=- up=- dealingTo=Dealer myTurn=False filled=False best=-
+21:37:11.730 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Random! (1-13) 5
+21:37:11.731 [BlackjackAdvisor] dealer up 5
+21:37:11.766 [BlackjackAdvisor] you=- up=5 dealingTo=Dealer myTurn=False filled=False best=-
+21:37:12.020 [BlackjackAdvisor] «Item» [] Tam G.Shiva readies a bottle of Realm Reborn red.
+21:37:12.764 [BlackjackAdvisor] you=- up=5 dealingTo=Dealer myTurn=False filled=False best=-
+21:37:12.797 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  ----------------------------------------------------
+21:37:13.769 [BlackjackAdvisor] you=- up=5 dealingTo=Dealer myTurn=False filled=False best=-
+21:37:13.877 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] 5
+21:37:14.769 [BlackjackAdvisor] you=- up=5 dealingTo=Dealer myTurn=False filled=False best=-
+21:37:15.263 [BlackjackAdvisor] «Item» [] Tam G.Shiva uses a bottle of Realm Reborn red.
+21:37:15.764 [BlackjackAdvisor] you=- up=5 dealingTo=Dealer myTurn=False filled=False best=-
+21:37:15.863 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Miri C.Shiva chooses Hit!
+21:37:15.863 [BlackjackAdvisor] Miri C.Shiva -> Hit, myTurn=False
+21:37:16.763 [BlackjackAdvisor] you=- up=5 dealingTo=Miri C.Shiva myTurn=False filled=False best=-
+21:37:16.955 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Random! (1-13) 5
+21:37:17.766 [BlackjackAdvisor] you=- up=5 dealingTo=Miri C.Shiva myTurn=False filled=False best=-
+21:37:18.041 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  ----------------------------------------------------
+21:37:18.474 [BlackjackAdvisor] «LoseBuff» [] Mira K. loses the effect of The Bole.
+21:37:18.761 [BlackjackAdvisor] you=- up=5 dealingTo=Miri C.Shiva myTurn=False filled=False best=-
+21:37:19.763 [BlackjackAdvisor] you=- up=5 dealingTo=Miri C.Shiva myTurn=False filled=False best=-
+21:37:20.335 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Miri C.Shiva got a Blackjack!!!
+21:37:20.755 [BlackjackAdvisor] you=- up=5 dealingTo=Miri C.Shiva myTurn=False filled=False best=-
+21:37:21.246 [BlackjackAdvisor] «Action» [] Ayla C.Odin uses The Ewer.
+21:37:21.277 [BlackjackAdvisor] «GainBuff» []    Miri C.Shiva gains the effect of The Ewer.
+21:37:21.760 [BlackjackAdvisor] you=10 up=5 dealingTo=Miri C.Shiva myTurn=False filled=False best=Hit
+21:37:22.272 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] see
+21:37:22.755 [BlackjackAdvisor] you=105 up=5 dealingTo=Miri C.Shiva myTurn=False filled=False best=Stand
+21:37:22.924 [BlackjackAdvisor] «Party» [DNC Miri C.Shiva] OMG
+21:37:23.292 [BlackjackAdvisor] «Item» [] Tam G.Shiva readies a bottle of Realm Reborn red.
+21:37:23.761 [BlackjackAdvisor] you=105 up=5 dealingTo=Miri C.Shiva myTurn=False filled=False best=Stand
+21:37:24.548 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] ----------------------------------------------------
+21:37:24.769 [BlackjackAdvisor] you=105 up=5 dealingTo=Miri C.Shiva myTurn=False filled=False best=Stand
+21:37:25.791 [BlackjackAdvisor] you=105 up=5 dealingTo=Miri C.Shiva myTurn=False filled=False best=Stand
+21:37:26.196 [BlackjackAdvisor] «Party» [DNC Miri C.Shiva] TIME TO SHINE
+21:37:26.488 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] you got blackjack ^^
+21:37:26.570 [BlackjackAdvisor] «Item» [] Tam G.Shiva uses a bottle of Realm Reborn red.
+21:37:26.798 [BlackjackAdvisor] you=105 up=5 dealingTo=Miri C.Shiva myTurn=False filled=False best=Stand
+21:37:27.791 [BlackjackAdvisor] you=105 up=5 dealingTo=Miri C.Shiva myTurn=False filled=False best=Stand
+21:37:28.848 [BlackjackAdvisor] you=105 up=5 dealingTo=Miri C.Shiva myTurn=False filled=False best=Stand
+21:37:29.840 [BlackjackAdvisor] you=105 up=5 dealingTo=Miri C.Shiva myTurn=False filled=False best=Stand
+21:37:30.752 [BlackjackAdvisor] «Party» [BLM Mira K.] gz
+21:37:30.839 [BlackjackAdvisor] you=105 up=5 dealingTo=Miri C.Shiva myTurn=False filled=False best=Stand
+21:37:31.842 [BlackjackAdvisor] you=105 up=5 dealingTo=Miri C.Shiva myTurn=False filled=False best=Stand
+21:37:32.842 [BlackjackAdvisor] you=105 up=5 dealingTo=Miri C.Shiva myTurn=False filled=False best=Stand
+21:37:33.781 [BlackjackAdvisor] «Action» [] Ayla C.Odin uses Astral Draw.
+21:37:33.781 [BlackjackAdvisor] «Healing» []    Ayla C.Odin recovers 2000 MP.
+21:37:33.845 [BlackjackAdvisor] you=105 up=5 dealingTo=Miri C.Shiva myTurn=False filled=False best=Stand
+21:37:34.036 [BlackjackAdvisor] «Item» [] Tam G.Shiva readies a bottle of Realm Reborn red.
+21:37:34.847 [BlackjackAdvisor] you=105 up=5 dealingTo=Miri C.Shiva myTurn=False filled=False best=Stand
+21:37:35.019 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Mira K., would you like to Hit, Stand or Double Down?
+21:37:35.019 [BlackjackAdvisor] skip: not my hand
+21:37:35.356 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  ----------------------------------------------------
+21:37:35.834 [BlackjackAdvisor] you=105 up=5 dealingTo=Mira K. myTurn=False filled=False best=Stand
+21:37:36.281 [BlackjackAdvisor] «LoseBuff» [] Miri C.Shiva loses the effect of The Ewer.
+21:37:36.837 [BlackjackAdvisor] you=105 up=5 dealingTo=Mira K. myTurn=False filled=False best=Stand
+21:37:37.245 [BlackjackAdvisor] «Item» [] Tam G.Shiva uses a bottle of Realm Reborn red.
+21:37:37.839 [BlackjackAdvisor] you=105 up=5 dealingTo=Mira K. myTurn=False filled=False best=Stand
+21:37:38.845 [BlackjackAdvisor] you=105 up=5 dealingTo=Mira K. myTurn=False filled=False best=Stand
+21:37:39.843 [BlackjackAdvisor] you=105 up=5 dealingTo=Mira K. myTurn=False filled=False best=Stand
+21:37:40.842 [BlackjackAdvisor] you=105 up=5 dealingTo=Mira K. myTurn=False filled=False best=Stand
+21:37:41.837 [BlackjackAdvisor] you=105 up=5 dealingTo=Mira K. myTurn=False filled=False best=Stand
+21:37:42.844 [BlackjackAdvisor] you=105 up=5 dealingTo=Mira K. myTurn=False filled=False best=Stand
+21:37:43.841 [BlackjackAdvisor] you=105 up=5 dealingTo=Mira K. myTurn=False filled=False best=Stand
+21:37:44.794 [BlackjackAdvisor] «Item» [] Tam G.Shiva readies a bottle of Realm Reborn red.
+21:37:44.842 [BlackjackAdvisor] you=105 up=5 dealingTo=Mira K. myTurn=False filled=False best=Stand
+21:37:45.678 [BlackjackAdvisor] «Yell» [Juno L.Shiva] Would you like to spice up your Evening with some Privacy, a nice Photo or a soothing Bath? Then get
+21:37:45.846 [BlackjackAdvisor] you=105 up=5 dealingTo=Mira K. myTurn=False filled=False best=Stand
+21:37:46.842 [BlackjackAdvisor] you=105 up=5 dealingTo=Mira K. myTurn=False filled=False best=Stand
+21:37:46.966 [BlackjackAdvisor] «Say» [Rowan B.Alpha]  hi lovely lala group♥
+21:37:47.725 [BlackjackAdvisor] «Yell» [Juno L.Shiva] Our VIP packages offer you various options for just this experience! From the Solo to the Full VIP p
+21:37:47.844 [BlackjackAdvisor] you=105 up=5 dealingTo=Mira K. myTurn=False filled=False best=Stand
+21:37:47.988 [BlackjackAdvisor] «Item» [] Tam G.Shiva uses a bottle of Realm Reborn red.
+21:37:48.146 [BlackjackAdvisor] «Party» [BLM Mira K.] stand
+21:37:48.833 [BlackjackAdvisor] you=105 up=5 dealingTo=Mira K. myTurn=False filled=False best=Stand
+21:37:49.840 [BlackjackAdvisor] you=105 up=5 dealingTo=Mira K. myTurn=False filled=False best=Stand
+21:37:50.835 [BlackjackAdvisor] you=105 up=5 dealingTo=Mira K. myTurn=False filled=False best=Stand
+21:37:51.840 [BlackjackAdvisor] you=105 up=5 dealingTo=Mira K. myTurn=False filled=False best=Stand
+21:37:52.835 [BlackjackAdvisor] you=105 up=5 dealingTo=Mira K. myTurn=False filled=False best=Stand
+21:37:53.839 [BlackjackAdvisor] you=105 up=5 dealingTo=Mira K. myTurn=False filled=False best=Stand
+21:37:53.938 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Mira K. chooses to Stand!
+21:37:53.938 [BlackjackAdvisor] Mira K. -> Stand, myTurn=False
+21:37:54.262 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  ----------------------------------------------------
+21:37:54.841 [BlackjackAdvisor] you=105 up=5 dealingTo=- myTurn=False filled=False best=Stand
+21:37:55.471 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  Time to reveal the 's second Card!
+21:37:55.471 [BlackjackAdvisor] dealer reveal
+21:37:55.845 [BlackjackAdvisor] you=105 up=5 dealingTo=Dealer myTurn=False filled=False best=Stand
+21:37:56.672 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Random! (1-13) 5
+21:37:56.834 [BlackjackAdvisor] you=105 up=5 dealingTo=Dealer myTurn=False filled=False best=Stand
+21:37:57.021 [BlackjackAdvisor] «Item» [] Tam G.Shiva readies a bottle of Realm Reborn red.
+21:37:57.650 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  ----------------------------------------------------
+21:37:57.837 [BlackjackAdvisor] you=105 up=5 dealingTo=Dealer myTurn=False filled=False best=Stand
+21:37:58.308 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] 10
+21:37:58.841 [BlackjackAdvisor] you=105 up=5 dealingTo=Dealer myTurn=False filled=False best=Stand
+21:37:59.235 [BlackjackAdvisor] «Say» [Wren K.Shiva] us outside tonight meh will see xD
+21:37:59.839 [BlackjackAdvisor] you=105 up=5 dealingTo=Dealer myTurn=False filled=False best=Stand
+21:37:59.987 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]   is below 16 and rolls again.
+21:38:00.333 [BlackjackAdvisor] «Item» [] Tam G.Shiva uses a bottle of Realm Reborn red.
+21:38:00.835 [BlackjackAdvisor] you=105 up=5 dealingTo=Dealer myTurn=False filled=False best=Stand
+21:38:00.943 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Random! (1-13) 13
+21:38:01.840 [BlackjackAdvisor] you=105 up=5 dealingTo=Dealer myTurn=False filled=False best=Stand
+21:38:01.991 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  ----------------------------------------------------
+21:38:02.627 [BlackjackAdvisor] «Say» [Wren K.Shiva] oops wrong chat
+21:38:02.627 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] 20
+21:38:02.845 [BlackjackAdvisor] you=105 up=5 dealingTo=Dealer myTurn=False filled=False best=Stand
+21:38:03.795 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] aww
+21:38:03.838 [BlackjackAdvisor] you=105 up=5 dealingTo=Dealer myTurn=False filled=False best=Stand
+21:38:04.151 [BlackjackAdvisor] «Say» [Wren K.Shiva] xD
+21:38:04.841 [BlackjackAdvisor] you=105 up=5 dealingTo=Dealer myTurn=False filled=False best=Stand
+21:38:05.604 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Mira loses
+21:38:05.838 [BlackjackAdvisor] you=105 up=5 dealingTo=Dealer myTurn=False filled=False best=Stand
+21:38:06.833 [BlackjackAdvisor] you=105 up=5 dealingTo=Dealer myTurn=False filled=False best=Stand
+21:38:07.013 [BlackjackAdvisor] «Item» [] Tam G.Shiva readies a bottle of Realm Reborn red.
+21:38:07.847 [BlackjackAdvisor] you=105 up=5 dealingTo=Dealer myTurn=False filled=False best=Stand
+21:38:08.840 [BlackjackAdvisor] you=105 up=5 dealingTo=Dealer myTurn=False filled=False best=Stand
+21:38:09.836 [BlackjackAdvisor] you=105 up=5 dealingTo=Dealer myTurn=False filled=False best=Stand
+21:38:10.200 [BlackjackAdvisor] «Item» [] Tam G.Shiva uses a bottle of Realm Reborn red.
+21:38:10.849 [BlackjackAdvisor] you=105 up=5 dealingTo=Dealer myTurn=False filled=False best=Stand
+21:38:11.860 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:38:12.859 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:38:13.136 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Miri is saved :D
+21:38:13.732 [BlackjackAdvisor] «Party» [BLM Mira K.] :c
+21:38:13.858 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:38:14.852 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:38:15.850 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:38:16.849 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:38:17.860 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:38:18.852 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:38:19.856 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:38:20.859 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:38:21.039 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] she lost pants but get to keep the top :D
+21:38:21.148 [BlackjackAdvisor] «Party» [DNC Miri C.Shiva] thank hydalyn
+21:38:21.848 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:38:22.853 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:38:23.386 [BlackjackAdvisor] «Item» [] Tam G.Shiva readies a bottle of Realm Reborn red.
+21:38:23.587 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] *giggles*
+21:38:23.884 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:38:24.926 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:38:25.965 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:38:26.227 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  Thank you for playing Blackjack. Rewards will be handed over shortly.
+21:38:26.799 [BlackjackAdvisor] «Item» [] Tam G.Shiva uses a bottle of Realm Reborn red.
+21:38:27.010 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:38:27.339 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  ----------------------------------------------------
+21:38:28.048 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:39:05.646 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  All players have placed their bets. Now let's see what kind of luck will the cards give you!
+21:39:05.963 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  ---------------------------------------
+21:39:06.199 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:39:07.200 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:39:08.204 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:39:08.722 [BlackjackAdvisor] «Item» [] Tam G.Shiva readies a bottle of Realm Reborn red.
+21:39:09.209 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:39:10.208 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:39:10.653 [BlackjackAdvisor] «Action» [] Ayla C.Odin uses The Balance.
+21:39:10.684 [BlackjackAdvisor] «GainBuff» []    Mira K. gains the effect of The Balance.
+21:39:10.840 [BlackjackAdvisor] «Debug» [] [Altoholic] Character has been saved
+21:39:11.222 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:39:11.271 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  Here is your first two Cards Mira K.!
+21:39:11.271 [BlackjackAdvisor] dealing to Mira K.
+21:39:11.956 [BlackjackAdvisor] «Item» [] Tam G.Shiva uses a bottle of Realm Reborn red.
+21:39:12.211 [BlackjackAdvisor] you=- up=- dealingTo=Mira K. myTurn=False filled=False best=-
+21:39:12.354 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Random! (1-13) 7
+21:39:13.222 [BlackjackAdvisor] you=- up=- dealingTo=Mira K. myTurn=False filled=False best=-
+21:39:13.459 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Random! (1-13) 7
+21:39:14.212 [BlackjackAdvisor] you=- up=- dealingTo=Mira K. myTurn=False filled=False best=-
+21:39:14.454 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  -------------------------------------------------------
+21:39:15.218 [BlackjackAdvisor] you=- up=- dealingTo=Mira K. myTurn=False filled=False best=-
+21:39:16.211 [BlackjackAdvisor] you=- up=- dealingTo=Mira K. myTurn=False filled=False best=-
+21:39:16.990 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] 14 or 7/7 splits
+21:39:17.223 [BlackjackAdvisor] you=- up=- dealingTo=Mira K. myTurn=False filled=False best=-
+21:39:18.235 [BlackjackAdvisor] you=- up=- dealingTo=Mira K. myTurn=False filled=False best=-
+21:39:18.684 [BlackjackAdvisor] «Action» [] Ayla C.Odin uses Lord of Crowns.
+21:39:18.684 [BlackjackAdvisor] «Miss» []    The attack misses.
+21:39:19.074 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  Time to reveal the 's first Card!
+21:39:19.074 [BlackjackAdvisor] dealer reveal
+21:39:19.223 [BlackjackAdvisor] you=- up=- dealingTo=Dealer myTurn=False filled=False best=-
+21:39:20.024 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Random! (1-13) 9
+21:39:20.024 [BlackjackAdvisor] dealer up 9
+21:39:20.051 [BlackjackAdvisor] «Item» [] Tam G.Shiva readies a bottle of Realm Reborn red.
+21:39:20.224 [BlackjackAdvisor] you=- up=9 dealingTo=Dealer myTurn=False filled=False best=-
+21:39:21.082 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  ----------------------------------------------------
+21:39:21.230 [BlackjackAdvisor] you=- up=9 dealingTo=Dealer myTurn=False filled=False best=-
+21:39:21.400 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] 9
+21:39:22.227 [BlackjackAdvisor] you=- up=9 dealingTo=Dealer myTurn=False filled=False best=-
+21:39:22.877 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Mira K., would you like to Hit, Stand or Double Down?
+21:39:22.877 [BlackjackAdvisor] skip: not my hand
+21:39:23.189 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  ----------------------------------------------------
+21:39:23.232 [BlackjackAdvisor] you=- up=9 dealingTo=Mira K. myTurn=False filled=False best=-
+21:39:23.290 [BlackjackAdvisor] «Item» [] Tam G.Shiva uses a bottle of Realm Reborn red.
+21:39:24.229 [BlackjackAdvisor] you=- up=9 dealingTo=Mira K. myTurn=False filled=False best=-
+21:39:25.233 [BlackjackAdvisor] you=- up=9 dealingTo=Mira K. myTurn=False filled=False best=-
+21:39:25.714 [BlackjackAdvisor] «LoseBuff» [] Mira K. loses the effect of The Balance.
+21:39:26.237 [BlackjackAdvisor] you=- up=9 dealingTo=Mira K. myTurn=False filled=False best=-
+21:39:27.237 [BlackjackAdvisor] you=- up=9 dealingTo=Mira K. myTurn=False filled=False best=-
+21:39:28.235 [BlackjackAdvisor] you=- up=9 dealingTo=Mira K. myTurn=False filled=False best=-
+21:39:29.225 [BlackjackAdvisor] you=- up=9 dealingTo=Mira K. myTurn=False filled=False best=-
+21:39:30.238 [BlackjackAdvisor] you=- up=9 dealingTo=Mira K. myTurn=False filled=False best=-
+21:39:31.246 [BlackjackAdvisor] you=7 up=9 dealingTo=Mira K. myTurn=False filled=False best=Hit
+21:39:32.245 [BlackjackAdvisor] you=77 up=9 dealingTo=Mira K. myTurn=False filled=False best=Hit
+21:39:33.199 [BlackjackAdvisor] «Party» [BLM Mira K.] hit
+21:39:33.246 [BlackjackAdvisor] you=77 up=9 dealingTo=Mira K. myTurn=False filled=False best=Hit
+21:39:33.912 [BlackjackAdvisor] «Item» [] Tam G.Shiva readies a bottle of Realm Reborn red.
+21:39:34.239 [BlackjackAdvisor] you=77 up=9 dealingTo=Mira K. myTurn=False filled=False best=Hit
+21:39:35.248 [BlackjackAdvisor] you=77 up=9 dealingTo=Mira K. myTurn=False filled=False best=Hit
+21:39:35.492 [BlackjackAdvisor] «Action» [] Ayla C.Odin uses The Arrow.
+21:39:35.524 [BlackjackAdvisor] «GainBuff» []    Mira K. gains the effect of The Arrow.
+21:39:35.678 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Mira K. chooses Hit!
+21:39:35.678 [BlackjackAdvisor] Mira K. -> Hit, myTurn=False
+21:39:36.252 [BlackjackAdvisor] you=77 up=9 dealingTo=Mira K. myTurn=False filled=False best=Hit
+21:39:36.683 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Random! (1-13) 8
+21:39:37.115 [BlackjackAdvisor] «Item» [] Tam G.Shiva uses a bottle of Realm Reborn red.
+21:39:37.245 [BlackjackAdvisor] you=77 up=9 dealingTo=Mira K. myTurn=False filled=False best=Hit
+21:39:37.772 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  ----------------------------------------------------
+21:39:38.252 [BlackjackAdvisor] you=77 up=9 dealingTo=Mira K. myTurn=False filled=False best=Hit
+21:39:38.725 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  Mira K. busted!
+21:39:39.048 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  ----------------------------------------------------
+21:39:39.248 [BlackjackAdvisor] you=77 up=9 dealingTo=- myTurn=False filled=False best=Hit
+21:39:40.246 [BlackjackAdvisor] you=77 up=9 dealingTo=- myTurn=False filled=False best=Hit
+21:39:41.250 [BlackjackAdvisor] you=778 up=9 dealingTo=- myTurn=False filled=False best=-
+21:39:42.247 [BlackjackAdvisor] you=778 up=9 dealingTo=- myTurn=False filled=False best=-
+21:39:43.241 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:39:44.203 [BlackjackAdvisor] «Party» [BLM Mira K.] :x
+21:39:44.249 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:39:45.245 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:39:46.242 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:39:46.440 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] and you lost once more
+21:39:47.118 [BlackjackAdvisor] «Item» [] Tam G.Shiva readies a bottle of Realm Reborn red.
+21:41:57.263 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  All players have placed their bets. Now let's see what kind of luck will the cards give you!
+21:41:57.583 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  ---------------------------------------
+21:41:57.749 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:41:58.742 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:41:59.749 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:42:00.742 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:42:01.739 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:42:02.543 [BlackjackAdvisor] «Action» [] Ayla C.Odin uses The Spear.
+21:42:02.577 [BlackjackAdvisor] «GainBuff» []    Mira K. gains the effect of The Spear.
+21:42:02.751 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:42:03.349 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  Here is your first two Cards Mira K.!
+21:42:03.349 [BlackjackAdvisor] dealing to Mira K.
+21:42:03.738 [BlackjackAdvisor] you=- up=- dealingTo=Mira K. myTurn=False filled=False best=-
+21:42:04.552 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Random! (1-13) 12
+21:42:04.742 [BlackjackAdvisor] you=- up=- dealingTo=Mira K. myTurn=False filled=False best=-
+21:42:05.524 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Random! (1-13) 1
+21:42:05.740 [BlackjackAdvisor] you=- up=- dealingTo=Mira K. myTurn=False filled=False best=-
+21:42:06.708 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  -------------------------------------------------------
+21:42:06.737 [BlackjackAdvisor] you=- up=- dealingTo=Mira K. myTurn=False filled=False best=-
+21:42:07.738 [BlackjackAdvisor] you=- up=- dealingTo=Mira K. myTurn=False filled=False best=-
+21:42:08.066 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Mira K. got a Blackjack!!!
+21:42:08.750 [BlackjackAdvisor] you=- up=- dealingTo=Mira K. myTurn=False filled=False best=-
+21:42:09.742 [BlackjackAdvisor] you=- up=- dealingTo=Mira K. myTurn=False filled=False best=-
+21:42:09.952 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] natural bj
+21:42:10.746 [BlackjackAdvisor] you=- up=- dealingTo=Mira K. myTurn=False filled=False best=-
+21:42:11.738 [BlackjackAdvisor] you=- up=- dealingTo=Mira K. myTurn=False filled=False best=-
+21:42:12.108 [BlackjackAdvisor] «Party» [BLM Mira K.] :D
+21:42:12.331 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] ----------------------------------------------------
+21:42:12.739 [BlackjackAdvisor] you=- up=- dealingTo=Mira K. myTurn=False filled=False best=-
+21:42:13.738 [BlackjackAdvisor] you=- up=- dealingTo=Mira K. myTurn=False filled=False best=-
+21:42:14.737 [BlackjackAdvisor] you=- up=- dealingTo=Mira K. myTurn=False filled=False best=-
+21:42:15.141 [BlackjackAdvisor] «Action» [] Ayla C.Odin uses Lady of Crowns.
+21:42:15.142 [BlackjackAdvisor] «Healing» []    Ayla C.Odin recovers 23710 HP.
+21:42:15.265 [BlackjackAdvisor] «Healing» []    Miri C.Shiva recovers 22963 HP.
+21:42:16.541 [BlackjackAdvisor] telemetry session started
+21:42:16.562 [BlackjackAdvisor] «Debug» [] Updates:  [Open plugin changelogs]
+21:42:16.581 [BlackjackAdvisor] «Debug» []     》 Blackjack Advisor updated to v0.4.4.0.
+21:42:17.453 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  ----------------------------------------------------
+21:42:17.607 [BlackjackAdvisor] «LoseBuff» [] Mira K. loses the effect of The Spear.
+21:42:18.006 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] 7
+21:42:19.552 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  Dealer Stands!
+21:42:19.659 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  ----------------------------------------------------
+21:42:21.808 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:42:22.788 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:42:22.854 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  Thank you for playing Blackjack. Rewards will be handed over shortly.
+21:42:23.792 [BlackjackAdvisor] you=- up=- dealingTo=- myTurn=False filled=False best=-
+21:42:24.022 [BlackjackAdvisor] «SystemMessage» [] Ayla C.Odin wishes to trade with you.
+21:42:24.044 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  ----------------------------------------------------
+21:48:20.080 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  All players have placed their bets. Now let's see what kind of luck will the cards give you!
+21:48:20.222 [BlackjackAdvisor] you=QA up=- dealingTo=- myTurn=False filled=True best=-
+21:48:20.411 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  ---------------------------------------
+21:48:21.228 [BlackjackAdvisor] you=QA up=- dealingTo=- myTurn=False filled=True best=-
+21:48:21.459 [BlackjackAdvisor] «Action» [] Ayla C.Odin uses The Spire.
+21:48:21.489 [BlackjackAdvisor] «GainBuff» []    Mira K. gains the effect of The Spire.
+21:48:21.956 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  Here is your first two Cards Mira K.!
+21:48:21.956 [BlackjackAdvisor] dealing to Mira K. (you)
+21:48:22.220 [BlackjackAdvisor] you=- up=- dealingTo=Mira K. myTurn=False filled=False best=-
+21:48:23.038 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Random! (1-13) 9
+21:48:23.038 [BlackjackAdvisor] preview draw 9
+21:48:23.222 [BlackjackAdvisor] you=9 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+21:48:24.034 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Random! (1-13) 11
+21:48:24.034 [BlackjackAdvisor] preview draw J
+21:48:24.218 [BlackjackAdvisor] you=9J up=- dealingTo=Mira K. myTurn=False filled=True best=-
+21:48:25.138 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  -------------------------------------------------------
+21:48:25.229 [BlackjackAdvisor] you=9J up=- dealingTo=Mira K. myTurn=False filled=True best=-
+21:48:25.356 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] 19
+21:48:26.222 [BlackjackAdvisor] you=9J up=- dealingTo=Mira K. myTurn=False filled=True best=-
+21:48:26.555 [BlackjackAdvisor] «Action» [] Ayla C.Odin uses Umbral Draw.
+21:48:26.555 [BlackjackAdvisor] «Healing» []    Ayla C.Odin recovers 2000 MP.
+21:48:26.688 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  Time to reveal the 's first Card!
+21:48:26.688 [BlackjackAdvisor] dealer reveal
+21:48:27.221 [BlackjackAdvisor] you=9J up=- dealingTo=Dealer myTurn=False filled=True best=-
+21:48:27.671 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Random! (1-13) 8
+21:48:27.671 [BlackjackAdvisor] dealer up 8
+21:48:28.218 [BlackjackAdvisor] you=9J up=8 dealingTo=Dealer myTurn=False filled=True best=Stand
+21:48:28.772 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  ----------------------------------------------------
+21:48:29.231 [BlackjackAdvisor] you=9J up=8 dealingTo=Dealer myTurn=False filled=True best=Stand
+21:48:29.317 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] 8
+21:48:30.224 [BlackjackAdvisor] you=9J up=8 dealingTo=Dealer myTurn=False filled=True best=Stand
+21:48:30.656 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Mira K., would you like to Hit, Stand or Double Down?
+21:48:30.656 [BlackjackAdvisor] no hand data parsed
+21:48:30.874 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  ----------------------------------------------------
+21:48:31.232 [BlackjackAdvisor] you=9J up=8 dealingTo=Mira K. myTurn=True filled=True best=Stand
+21:48:31.838 [BlackjackAdvisor] «Party» [BLM Mira K.] stand
+21:48:32.227 [BlackjackAdvisor] you=9J up=8 dealingTo=Mira K. myTurn=True filled=True best=Stand
+21:48:33.220 [BlackjackAdvisor] you=9J up=8 dealingTo=Mira K. myTurn=True filled=True best=Stand
+21:48:34.233 [BlackjackAdvisor] you=9J up=8 dealingTo=Mira K. myTurn=True filled=True best=Stand
+21:48:34.342 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  Time to reveal the 's second Card!
+21:48:34.342 [BlackjackAdvisor] dealer reveal
+21:48:35.227 [BlackjackAdvisor] you=9J up=8 dealingTo=Dealer myTurn=False filled=True best=Stand
+21:48:35.427 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Random! (1-13) 10
+21:48:35.427 [BlackjackAdvisor] draw 10 -> Dealer, not you
+21:48:36.226 [BlackjackAdvisor] you=9J up=8 dealingTo=Dealer myTurn=False filled=True best=Stand
+21:48:36.507 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  ----------------------------------------------------
+21:48:37.054 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] 18
+21:48:37.219 [BlackjackAdvisor] you=9J up=8 dealingTo=Dealer myTurn=False filled=True best=Stand
+21:48:38.223 [BlackjackAdvisor] you=9J up=8 dealingTo=Dealer myTurn=False filled=True best=Stand
+21:48:39.232 [BlackjackAdvisor] you=9J up=8 dealingTo=Dealer myTurn=False filled=True best=Stand
+21:48:39.468 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  Dealer Stands!
+21:48:39.678 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  ----------------------------------------------------
+21:48:40.232 [BlackjackAdvisor] you=9J up=8 dealingTo=Dealer myTurn=False filled=True best=Stand
+21:48:40.544 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  Thank you for playing Blackjack. Rewards will be handed over shortly.
+21:48:41.226 [BlackjackAdvisor] you=9J up=8 dealingTo=Dealer myTurn=False filled=True best=Stand
+21:48:41.523 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  ----------------------------------------------------
+22:15:31.226 [BlackjackAdvisor] «SystemMessage» [] Awaiting trade confirmation from Ayla C.Odin...
+22:15:31.316 [BlackjackAdvisor] «SystemMessage» [] You hand over 100,000 gil.
+22:15:31.316 [BlackjackAdvisor] «SystemMessage» [] Trade complete.
+22:15:31.353 [BlackjackAdvisor] you=6K9 up=7 dealingTo=- myTurn=False filled=True best=-
+22:15:32.346 [BlackjackAdvisor] you=6K9 up=7 dealingTo=- myTurn=False filled=True best=-
+22:15:33.347 [BlackjackAdvisor] you=6K9 up=7 dealingTo=- myTurn=False filled=True best=-
+22:15:34.355 [BlackjackAdvisor] you=6K9 up=7 dealingTo=- myTurn=False filled=True best=-
+22:15:35.353 [BlackjackAdvisor] you=6K9 up=7 dealingTo=- myTurn=False filled=True best=-
+22:15:36.351 [BlackjackAdvisor] you=6K9 up=7 dealingTo=- myTurn=False filled=True best=-
+22:15:37.354 [BlackjackAdvisor] you=6K9 up=7 dealingTo=- myTurn=False filled=True best=-
+22:15:38.351 [BlackjackAdvisor] you=6K9 up=7 dealingTo=- myTurn=False filled=True best=-
+22:15:39.348 [BlackjackAdvisor] you=6K9 up=7 dealingTo=- myTurn=False filled=True best=-
+22:15:40.346 [BlackjackAdvisor] you=6K9 up=7 dealingTo=- myTurn=False filled=True best=-
+22:15:41.349 [BlackjackAdvisor] you=6K9 up=7 dealingTo=- myTurn=False filled=True best=-
+22:15:42.351 [BlackjackAdvisor] you=6K9 up=7 dealingTo=- myTurn=False filled=True best=-
+22:15:43.350 [BlackjackAdvisor] you=6K9 up=7 dealingTo=- myTurn=False filled=True best=-
+22:15:44.349 [BlackjackAdvisor] you=6K9 up=7 dealingTo=- myTurn=False filled=True best=-
+22:15:44.363 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  Here is your first two Cards Mira K.!
+22:15:44.363 [BlackjackAdvisor] dealing to Mira K. (you)
+22:15:44.531 [BlackjackAdvisor] «Party» [BLM Mira K.] <.<
+22:15:45.352 [BlackjackAdvisor] you=- up=- dealingTo=Mira K. myTurn=False filled=False best=-
+22:15:45.479 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Random! (1-13) 6
+22:15:45.479 [BlackjackAdvisor] preview draw 6
+22:15:46.345 [BlackjackAdvisor] you=6 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:15:46.392 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Random! (1-13) 6
+22:15:46.392 [BlackjackAdvisor] preview draw 6
+22:15:47.355 [BlackjackAdvisor] you=66 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:15:47.503 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  -------------------------------------------------------
+22:15:48.350 [BlackjackAdvisor] you=66 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:15:49.343 [BlackjackAdvisor] you=66 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:15:50.346 [BlackjackAdvisor] you=66 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:15:50.453 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] 12 or 6/6 split
+22:15:51.350 [BlackjackAdvisor] you=total 12 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:15:52.350 [BlackjackAdvisor] you=total 12 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:15:53.188 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  Time to reveal the DEALER's first Card!
+22:15:53.188 [BlackjackAdvisor] dealer reveal
+22:15:53.354 [BlackjackAdvisor] you=total 12 up=- dealingTo=Dealer myTurn=False filled=True best=-
+22:15:54.100 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Random! (1-13) 6
+22:15:54.100 [BlackjackAdvisor] dealer up 6
+22:15:54.345 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Dealer myTurn=False filled=True best=Split
+22:15:55.215 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  ----------------------------------------------------
+22:15:55.349 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Dealer myTurn=False filled=True best=Split
+22:15:55.619 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] 6
+22:15:56.346 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Dealer myTurn=False filled=True best=Split
+22:15:57.031 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Mira K., would you like to Hit, Stand or Double Down?
+22:15:57.031 [BlackjackAdvisor] no hand data parsed
+22:15:57.333 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  ----------------------------------------------------
+22:15:57.342 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:15:58.347 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:15:59.353 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:00.346 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:01.346 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:01.869 [BlackjackAdvisor] «Party» [BLM Mira K.] can i split
+22:16:02.349 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:03.350 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:04.341 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:05.350 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:05.635 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] yeah
+22:16:06.342 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:07.341 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:07.824 [BlackjackAdvisor] «Party» [BLM Mira K.] split
+22:16:08.349 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:09.349 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:10.297 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] thats why i said 6/6 split
+22:16:10.351 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:11.338 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] >.>
+22:16:11.348 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:12.351 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:13.343 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:14.256 [BlackjackAdvisor] «Party» [BLM Mira K.] :3
+22:16:14.343 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:14.413 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Trading Mira K.!
+22:16:15.343 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:16.347 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:16.591 [BlackjackAdvisor] «SystemMessage» [] Ayla C.Odin wishes to trade with you.
+22:16:17.343 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:17.559 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  ----------------------------------
+22:16:18.350 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:19.357 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:20.365 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:20.562 [BlackjackAdvisor] «Party» [BLM Mira K.] ur last line doesnt say split haha :p
+22:16:21.365 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:22.364 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:23.360 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:24.358 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:25.355 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:26.363 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:27.361 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:28.364 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:28.905 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] 12 or 6/6 split
+22:16:29.365 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:30.363 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:31.356 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:32.341 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] thats what i said
+22:16:32.362 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:33.355 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] >.>
+22:16:33.366 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:34.355 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:35.357 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:36.356 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:37.364 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:38.008 [BlackjackAdvisor] «Party» [BLM Mira K.] "Mira K., would you like to Hit, Stand or Double Down?"
+22:16:38.008 [BlackjackAdvisor] skip: sender 'BLM Mira K.' != dealer 'AST Ayla C.Odin'
+22:16:38.366 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:39.356 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:40.357 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:41.358 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:42.357 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:42.694 [BlackjackAdvisor] «Party» [BLM Mira K.] <.< its oki im joking :p
+22:16:43.354 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:44.363 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:44.993 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] thats a macro
+22:16:45.357 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:46.364 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:47.362 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:47.914 [BlackjackAdvisor] «Party» [BLM Mira K.] ohh
+22:16:48.359 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:48.930 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] i dont use plogon xD
+22:16:49.364 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:50.366 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:51.362 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:52.365 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:53.316 [BlackjackAdvisor] «SystemMessage» [] Awaiting trade confirmation from Ayla C.Odin...
+22:16:53.354 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:53.455 [BlackjackAdvisor] «SystemMessage» [] You hand over 100,000 gil.
+22:16:53.455 [BlackjackAdvisor] «SystemMessage» [] Trade complete.
+22:16:54.354 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:55.361 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:56.360 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:57.364 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:58.358 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:16:59.363 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:17:00.353 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:17:01.359 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:17:02.358 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:17:03.356 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:17:04.352 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:17:05.352 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:17:06.361 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:17:07.356 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:17:08.361 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:17:09.363 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:17:10.364 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:17:11.009 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] i am surprised you didnt figure it out xD
+22:17:11.365 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:17:12.358 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:17:13.353 [BlackjackAdvisor] you=total 12 up=6 dealingTo=Mira K. myTurn=True filled=True best=Split
+22:17:14.272 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  Here is your first two Cards Mira K.!
+22:17:14.272 [BlackjackAdvisor] dealing to Mira K. (you)
+22:17:14.360 [BlackjackAdvisor] you=- up=- dealingTo=Mira K. myTurn=False filled=False best=-
+22:17:15.358 [BlackjackAdvisor] you=- up=- dealingTo=Mira K. myTurn=False filled=False best=-
+22:17:15.382 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Random! (1-13) 7
+22:17:15.382 [BlackjackAdvisor] preview draw 7
+22:17:16.357 [BlackjackAdvisor] you=7 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:16.394 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Random! (1-13) 3
+22:17:16.394 [BlackjackAdvisor] preview draw 3
+22:17:17.355 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:17.504 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  -------------------------------------------------------
+22:17:18.353 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:19.356 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:19.538 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] 13 - 9
+22:17:20.347 [BlackjackAdvisor] «Party» [BLM Mira K.] haha i guess all use some lol
+22:17:20.357 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:21.358 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:22.355 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:23.356 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:24.357 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:25.351 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:26.360 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:27.359 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:28.356 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:29.355 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:30.361 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:31.358 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:31.763 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] last 2 rounds i'm afraid
+22:17:32.351 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:33.361 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:33.542 [BlackjackAdvisor] «Party» [BLM Mira K.] hit
+22:17:34.357 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:35.356 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:36.354 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:37.356 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:38.351 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:39.351 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] hit both?
+22:17:39.360 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:40.357 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:41.357 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:42.351 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:43.355 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:44.353 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:45.353 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:46.041 [BlackjackAdvisor] «Party» [BLM Mira K.] y
+22:17:46.353 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:47.358 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:48.359 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:49.355 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:50.349 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:51.353 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:52.359 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:53.350 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:54.355 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:55.355 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:56.355 [BlackjackAdvisor] you=73 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:57.261 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  Here is your first two Cards Mira K.!
+22:17:57.261 [BlackjackAdvisor] dealing to Mira K. (you)
+22:17:57.359 [BlackjackAdvisor] you=- up=- dealingTo=Mira K. myTurn=False filled=False best=-
+22:17:58.352 [BlackjackAdvisor] you=- up=- dealingTo=Mira K. myTurn=False filled=False best=-
+22:17:58.377 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Random! (1-13) 9
+22:17:58.377 [BlackjackAdvisor] preview draw 9
+22:17:59.356 [BlackjackAdvisor] you=9 up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:17:59.493 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Random! (1-13) 13
+22:17:59.493 [BlackjackAdvisor] preview draw K
+22:18:00.356 [BlackjackAdvisor] you=9K up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:18:00.508 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  -------------------------------------------------------
+22:18:01.357 [BlackjackAdvisor] you=9K up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:18:02.358 [BlackjackAdvisor] you=9K up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:18:03.355 [BlackjackAdvisor] you=9K up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:18:03.546 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] bust - 19
+22:18:04.356 [BlackjackAdvisor] you=9K up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:18:05.348 [BlackjackAdvisor] you=9K up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:18:06.354 [BlackjackAdvisor] you=9K up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:18:06.938 [BlackjackAdvisor] «Party» [BLM Mira K.] stando
+22:18:07.356 [BlackjackAdvisor] you=9K up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:18:08.352 [BlackjackAdvisor] you=9K up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:18:09.352 [BlackjackAdvisor] you=9K up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:18:10.349 [BlackjackAdvisor] you=9K up=- dealingTo=Mira K. myTurn=False filled=True best=-
+22:18:11.375 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Mira K. chooses to Stand!
+22:18:11.375 [BlackjackAdvisor] Mira K. -> Stand, myTurn=False
+22:18:11.387 [BlackjackAdvisor] you=9K up=- dealingTo=- myTurn=False filled=True best=-
+22:18:11.786 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  ----------------------------------------------------
+22:18:12.389 [BlackjackAdvisor] you=9K up=- dealingTo=- myTurn=False filled=True best=-
+22:18:13.431 [BlackjackAdvisor] you=9K up=- dealingTo=- myTurn=False filled=True best=-
+22:18:14.460 [BlackjackAdvisor] you=9K up=- dealingTo=- myTurn=False filled=True best=-
+22:18:15.493 [BlackjackAdvisor] you=9K up=- dealingTo=- myTurn=False filled=True best=-
+22:18:16.187 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  Time to reveal the DEALER's second Card!
+22:18:16.187 [BlackjackAdvisor] dealer reveal
+22:18:16.524 [BlackjackAdvisor] you=9K up=- dealingTo=Dealer myTurn=False filled=True best=-
+22:18:17.221 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] Random! (1-13) 12
+22:18:17.221 [BlackjackAdvisor] dealer up Q
+22:18:17.555 [BlackjackAdvisor] you=9K up=Q dealingTo=Dealer myTurn=False filled=True best=Stand
+22:18:18.251 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  ----------------------------------------------------
+22:18:18.590 [BlackjackAdvisor] you=9K up=Q dealingTo=Dealer myTurn=False filled=True best=Stand
+22:18:19.621 [BlackjackAdvisor] you=9K up=Q dealingTo=Dealer myTurn=False filled=True best=Stand
+22:18:19.674 [BlackjackAdvisor] «Party» [AST Ayla C.Odin] 16
+22:18:20.653 [BlackjackAdvisor] you=9K up=Q dealingTo=Dealer myTurn=False filled=True best=Stand
+22:18:21.093 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  Dealer Stands!
+22:18:21.222 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  ----------------------------------------------------
+22:18:21.612 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  Thank you for playing Blackjack. Rewards will be handed over shortly.
+22:18:21.690 [BlackjackAdvisor] you=9K up=Q dealingTo=Dealer myTurn=False filled=True best=Stand
+22:18:22.699 [BlackjackAdvisor] you=9K up=Q dealingTo=Dealer myTurn=False filled=True best=Stand
+22:18:22.754 [BlackjackAdvisor] «SystemMessage» [] Ayla C.Odin wishes to trade with you.
+22:18:22.781 [BlackjackAdvisor] «Party» [AST Ayla C.Odin]  ----------------------------------------------------
+22:18:23.700 [BlackjackAdvisor] you=9K up=Q dealingTo=Dealer myTurn=False filled=True best=Stand
+22:18:24.698 [BlackjackAdvisor] you=9K up=Q dealingTo=Dealer myTurn=False filled=True best=Stand
+22:18:25.693 [BlackjackAdvisor] you=9K up=Q dealingTo=Dealer myTurn=False filled=True best=Stand
+22:18:26.694 [BlackjackAdvisor] you=9K up=Q dealingTo=Dealer myTurn=False filled=True best=Stand
+22:18:27.695 [BlackjackAdvisor] you=9K up=Q dealingTo=Dealer myTurn=False filled=True best=Stand
+22:18:28.694 [BlackjackAdvisor] you=9K up=Q dealingTo=Dealer myTurn=False filled=True best=Stand
+22:18:29.273 [BlackjackAdvisor] «SystemMessage» [] Awaiting trade confirmation from Ayla C.Odin...
+22:18:29.442 [BlackjackAdvisor] «SystemMessage» [] You receive 100,000 gil.
+22:18:29.442 [BlackjackAdvisor] «SystemMessage» [] Trade complete.

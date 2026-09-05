@@ -95,6 +95,8 @@ namespace BlackjackAdvisor.Chat
             {
                 hand.Add(new Card(rank, Suits[hand.Count % 4]));
                 totalMode = false;
+                inPair = false;
+                inSoft = false;
                 filledFromChat = fromChat;
             }
         }
@@ -117,6 +119,8 @@ namespace BlackjackAdvisor.Chat
                 hand.Clear();
                 hand.AddRange(cards);
                 totalMode = false;
+                inPair = false;
+                inSoft = false;
             }
         }
 

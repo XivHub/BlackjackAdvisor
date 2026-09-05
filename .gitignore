@@ -15,3 +15,5 @@ HANDOFF.md
 PLAN.md
 PLAN_QOL.md
 scratch_probe_dummy/
+tools/ParserHarness/bin/
+tools/ParserHarness/obj/

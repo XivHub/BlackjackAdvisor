@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net10.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<AssemblyName>ParserHarness</AssemblyName>
+		<RootNamespace>ParserHarness</RootNamespace>
+		<IsPackable>false</IsPackable>
+	</PropertyGroup>
+
+	<!-- Compiles the plugin's chat parser and strategy engine straight from source: this project
+	     is a standalone offline tool, never a dependency of BlackjackAdvisor.csproj, and never
+	     referenced by it. -->
+	<ItemGroup>
+		<Compile Include="..\..\BlackjackAdvisor\Chat\*.cs" LinkBase="Chat" />
+		<Compile Include="..\..\BlackjackAdvisor\Strategy\BlackjackEngine.cs" LinkBase="Strategy" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="Fixtures\**\*" CopyToOutputDirectory="PreserveNewest" />
+	</ItemGroup>
+</Project>
