@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<Authors>Zhyra</Authors>
 		<Company>ZhyraPlugins</Company>
-		<Version>0.5.0</Version>
+		<Version>0.6.0</Version>
 		<Description>Blackjack basic-strategy advisor and gil tracker.</Description>
 		<PackageProjectUrl>https://github.com/edg-l/BlackjackAdvisor</PackageProjectUrl>
 		<IsPackable>false</IsPackable>

@@ -24,6 +24,11 @@ namespace BlackjackAdvisor.Chat
         {
             lock (gate)
             {
+                // One template means one thing to one dealer. Re-adding it replaces the binding
+                // rather than leaving two rows racing each other in the store and in the UI, where
+                // they would share an ImGui id and delete each other.
+                lines.RemoveAll(l => l.Template == line.Template && l.Dealer == line.Dealer);
+
                 if (lines.Count >= Cap)
                 {
                     var oldest = lines.Where(l => l.Auto).OrderBy(l => l.LearnedAtUnix).FirstOrDefault();
@@ -50,18 +55,16 @@ namespace BlackjackAdvisor.Chat
             }
         }
 
-        public void SetScope(string template, string dealer, string newDealer)
-        {
-            lock (gate)
-            {
-                var l = lines.FirstOrDefault(x => x.Template == template && x.Dealer == dealer);
-                if (l != null) l.Dealer = newDealer;
-            }
-        }
-
         public IReadOnlyList<LearnedLine> ForDealer(string dealer)
         {
             lock (gate) return lines.Where(l => l.Dealer == dealer).ToList();
+        }
+
+        /// <summary>Every stored binding, any dealer scope — the "Learned dealer lines" table
+        /// enumerates the whole store this way and filters client-side.</summary>
+        public IReadOnlyList<LearnedLine> All()
+        {
+            lock (gate) return lines.ToList();
         }
 
         /// <summary>Matches canonicalized text against every stored template, dealer-scoped lines

@@ -42,6 +42,22 @@ namespace BlackjackAdvisor.Chat
         // Templates that were unbound this session are never auto-bound again until the plugin restarts.
         private readonly HashSet<(string Template, string Dealer)> sessionVeto = new();
 
+        // Lines bound this session (auto or taught), per dealer scope — what the "learned N of
+        // this dealer's lines" note under the table counts. Never persisted: a config already
+        // carrying learned lines at startup did not "just" learn them this session.
+        private readonly Dictionary<string, int> sessionBinds = new();
+
+        // A wrong binding and a wrong card-value rule both show up as an equation that will not
+        // balance, so one disagreement says nothing: only a run of them points at the cards. Below
+        // this many samples the question stays open rather than being answered wrongly.
+        private const int MinBalanceSample = 6;
+
+        // Learning runs on the chat thread while the window's notes, the learned-lines table and the
+        // ledger buttons reach the same dictionaries from the draw thread. A dictionary resized
+        // under a concurrent lookup can spin forever, so every collection here is taken under one
+        // gate — the same shape TemplateStore uses.
+        private readonly object gate = new();
+
         private readonly Queue<bool> recentBalance = new();
         public bool ValuesLookWrong { get; private set; }
 
@@ -59,18 +75,60 @@ namespace BlackjackAdvisor.Chat
         /// <summary>Clears the hands a round boundary makes stale. Hypotheses, contradictions and
         /// the veto set persist across rounds — they are about the dealer's wording, not any one
         /// hand.</summary>
-        public void ResetForNextRound() => subjectCards.Clear();
+        public void ResetForNextRound() { lock (gate) subjectCards.Clear(); }
 
         /// <summary>What /bj status shows: every hypothesis under test with its confirmation count.</summary>
-        public IEnumerable<string> StatusLines() =>
-            hypotheses.Select(kv => $"{RoleIds.Id(kv.Key.Role)} '{kv.Key.Template}' ({kv.Value.Confirms}/2)");
+        public IEnumerable<string> StatusLines()
+        {
+            // Materialized inside the lock: a lazy projection would be enumerated by the caller
+            // long after the gate was released, over a dictionary the chat thread keeps changing.
+            lock (gate)
+                return hypotheses
+                    .Select(kv => $"{RoleIds.Id(kv.Key.Role)} '{kv.Key.Template}' ({kv.Value.Confirms}/2)")
+                    .ToList();
+        }
 
         /// <summary>The running total for a subject this round ("Dealer" for the dealer), for
         /// /bj status. Null when that subject has no defined hand yet.</summary>
-        public int? RunningTotal(string subject) =>
-            subjectCards.TryGetValue(subject, out var cards) && cards.Count > 0 ? HandState.TotalOf(cards, out _) : null;
+        public int? RunningTotal(string subject)
+        {
+            lock (gate)
+                return subjectCards.TryGetValue(subject, out var cards) && cards.Count > 0
+                    ? HandState.TotalOf(cards, out _) : null;
+        }
+
+        /// <summary>How many lines were bound (auto or taught) for this dealer scope since the
+        /// plugin started, for the host's "learned N of this dealer's lines" note.</summary>
+        public int SessionBindCount(string dealerScope)
+        {
+            lock (gate) return sessionBinds.TryGetValue(dealerScope, out int n) ? n : 0;
+        }
+
+        /// <summary>Adds a (template, dealer) pair to the session veto set directly — used by the
+        /// host when a row is removed by hand or a taught binding is undone, so the checksum
+        /// learner cannot instantly re-bind what the user just took back.</summary>
+        public void Veto(string template, string dealer)
+        {
+            lock (gate) sessionVeto.Add((template, dealer));
+        }
+
+        /// <summary>Counts a binding made outside the checksum path — the teach banner's own
+        /// "yes" button — toward the same session tally <see cref="TryAutoBind"/> keeps.</summary>
+        public void NoteSessionBind(string dealerScope)
+        {
+            lock (gate)
+            {
+                sessionBinds.TryGetValue(dealerScope, out int n);
+                sessionBinds[dealerScope] = n + 1;
+            }
+        }
 
         public void OnGroupClosed(RollGroup group, IReadOnlyList<string> roster, string dealerScope)
+        {
+            lock (gate) OnGroupClosedLocked(group, roster, dealerScope);
+        }
+
+        private void OnGroupClosedLocked(RollGroup group, IReadOnlyList<string> roster, string dealerScope)
         {
             if (!learnEnabled()) return;
             if (group.Opener == null || group.Bust) return;
@@ -188,6 +246,14 @@ namespace BlackjackAdvisor.Chat
             sessionVeto.Add(vkey);
             markDirty();
             contradictions.Remove(vkey);
+            // The binding was wrong, not the card values: drop the evidence it produced so a
+            // corrected reading is not judged against it.
+            recentBalance.Clear();
+            if (ValuesLookWrong)
+            {
+                ValuesLookWrong = false;
+                host.Log("card values look consistent with the standard mapping again");
+            }
             host.Log($"unbind {RoleIds.Id(boundRole)} '{bound.Template}' after 3 contradictions");
         }
 
@@ -222,6 +288,8 @@ namespace BlackjackAdvisor.Chat
             };
             if (!store.Add(line)) return;
             markDirty();
+            sessionBinds.TryGetValue(dealerScope, out int n);
+            sessionBinds[dealerScope] = n + 1;
             host.Log($"bind {RoleIds.Id(role)} '{template}'");
         }
 
@@ -236,7 +304,8 @@ namespace BlackjackAdvisor.Chat
             recentBalance.Enqueue(balanced);
             while (recentBalance.Count > 10) recentBalance.Dequeue();
 
-            bool wrong = recentBalance.Count > 0 && recentBalance.Count(x => x) * 2 < recentBalance.Count;
+            bool wrong = recentBalance.Count >= MinBalanceSample
+                         && recentBalance.Count(x => x) * 2 < recentBalance.Count;
             if (wrong == ValuesLookWrong) return;
             ValuesLookWrong = wrong;
             host.Log(wrong

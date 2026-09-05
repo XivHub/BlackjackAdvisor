@@ -70,6 +70,37 @@ Random! (1-13) 11
 19
 ```
 
+## Outcomes (no draws, no total — the hand is just over)
+
+```
+ Lielle C.Shiva got a Blackjack!!!
+ Hina R. busted!
+```
+A natural blackjack is always worth 21; a bust carries no total at all. Both close a run of rolls
+the same way a bare total does, so the checksum learner reads them regardless of which venue's
+wording opened the hand.
+
+## The same macro, mid-session, with its boxed letters replaced
+
+The reveal line's boxed-letter `DEALER` (see below) is not fixed for the life of a session: the same
+venue's macro was edited partway through this capture from boxed glyphs to literal ASCII, so both of
+these appear for the identical event:
+```
+ Time to reveal the DEALER's first Card!    <- DEALER written in boxed letters (U+E071-U+E08A)
+ Time to reveal the DEALER's first Card!    <- plain text, after
+```
+Recognising `reveal ... first/second Card` regardless of what precedes it, rather than keying on the
+literal word `DEALER`, is what survives a dealer changing their own macro's spelling mid-table.
+
+## Bare total offering a split (singular form)
+
+```
+12 or 6/6 split
+14 or 7/7 splits
+```
+`split` and `splits` both appear for the same shape across this capture; the total is the first
+number either way, and the pair only when both halves of the `N/N` match.
+
 Parsing notes:
 - The name trails the deal line (`... Cards <name>!`) instead of taking a possessive.
 - Names in chat are not the names the object table holds. The client's name-display setting

@@ -33,6 +33,21 @@ namespace BlackjackAdvisor.Windows
         private int sessionStartGil = -1;
         private int wins, losses, pushes;
 
+        // "Learned dealer lines" (Rules): the dealer combo's own filter, and the pending
+        // "forget everything for this dealer" confirm modal (opened next frame — see DrawForgetModal).
+        private string? learnedDealerFilter;
+        private bool learnedForgetOpen;
+        private string learnedForgetDealer = "";
+
+        // The role combo's fixed display order: the plan's copy lists the four checksum roles
+        // before the housekeeping ones, not the enum's own declaration order (which puts Ignore first).
+        private static readonly TemplateRole[] RoleOrder =
+        {
+            TemplateRole.DealTo, TemplateRole.DealerFirst, TemplateRole.DealerNext, TemplateRole.Acting,
+            TemplateRole.EndTurn, TemplateRole.Total, TemplateRole.RoundStart, TemplateRole.Ignore,
+        };
+        private static readonly string[] RoleLabels = RoleOrder.Select(RoleIds.Label).ToArray();
+
         // Crisp large font (baked once, downscaled when drawn -> sharp).
         private readonly IFontHandle bigFont;
 
@@ -77,8 +92,27 @@ namespace BlackjackAdvisor.Windows
 
         // Refreshes the roster from the object table on the framework thread, once a frame — the
         // learner reads the cached snapshot from the chat thread via IParserHost.RosterNames.
-        private void OnFrameworkUpdate(IFramework framework) =>
-            rosterCache = Plugin.ObjectTable.PlayerObjects.Select(p => p.Name.TextValue).ToArray();
+        private void OnFrameworkUpdate(IFramework framework)
+        {
+            // Who is standing at a card table changes at human speed, so reading the object table
+            // once a second spares a crowded district several hundred string allocations a frame.
+            var now = DateTime.UtcNow;
+            if (now - lastRosterRead >= TimeSpan.FromSeconds(1))
+            {
+                lastRosterRead = now;
+                rosterCache = Plugin.ObjectTable.PlayerObjects.Select(p => p.Name.TextValue).ToArray();
+            }
+
+            // The learner runs on the chat thread and the config must be written from this one.
+            // Saving here rather than in Draw means a line learned while the window was closed
+            // still survives a restart.
+            if (!parser.LearnedDirty) return;
+            c.LearnedLines = parser.Store.All().ToList();
+            c.Save();
+            parser.ClearLearnedDirty();
+        }
+
+        private DateTime lastRosterRead = DateTime.MinValue;
 
         // ---- IParserHost ---------------------------------------------------------------
 
@@ -110,14 +144,6 @@ namespace BlackjackAdvisor.Windows
 
         public override void Draw()
         {
-            // At most one Save() per frame, and only from this thread — never the chat thread the
-            // learner runs on.
-            if (parser.LearnedDirty)
-            {
-                c.Save();
-                parser.ClearLearnedDirty();
-            }
-
             var snap = parser.State.Read();
             bool ready = snap.Dealer.HasValue && (snap.TotalMode || snap.Hand.Count > 0);
             EvalResult? r = ready ? Evaluate(snap) : null;
@@ -129,7 +155,9 @@ namespace BlackjackAdvisor.Windows
 
             DrawRules();
             ImGui.Spacing();
+            DrawTeachBanner();
             DrawTable(snap, r);
+            DrawLearnedNote();
             ImGui.Spacing();
             if (parser.Hypotheses.ValuesLookWrong)
             {
@@ -169,6 +197,86 @@ namespace BlackjackAdvisor.Windows
                 using (bigFont.Push())
                     return ImGui.CalcTextSize(text) * (size / ImGui.GetFontSize());
             return ImGui.CalcTextSize(text) * (size / ImGui.GetFontSize());
+        }
+
+        // ---- Teach banner --------------------------------------------------------------
+
+        // One banner slot for the whole learner-teaching flow, drawn between the rules header and
+        // the felt table: an active candidate proposal takes priority, then a just-taught undo
+        // window, then the "no other line to try" dead end, then the plain unclaimed-rolls notice.
+        // At most one of these is ever true at once, and none of them draw anything when idle.
+        private void DrawTeachBanner()
+        {
+            if (parser.PendingTeach is { } cand) { DrawTeachCandidate(cand); return; }
+            if (parser.CanUndoTeach) { DrawTeachUndo(); return; }
+            if (parser.TeachExhausted) { DrawTeachExhausted(); return; }
+            if (parser.PendingUnclaimedRanks is { } ranks) DrawUnclaimedRolls(ranks);
+        }
+
+        private void DrawUnclaimedRolls(IReadOnlyList<string> ranks)
+        {
+            ImGui.TextColored(HubStyle.Warn, $"Unclaimed cards: {string.Join(", ", ranks)}");
+            ImGui.TextColored(HubStyle.Muted, "This dealer announces no totals, so I can't tell whose these are.");
+            if (ImGui.Button("Those were my cards")) parser.ClaimUnclaimedRolls();
+            ImGui.SameLine();
+            if (ImGui.Button("Not mine")) parser.DismissUnclaimedRolls();
+            ImGui.Spacing();
+        }
+
+        private static string TeachYesLabel(TemplateRole role) => role switch
+        {
+            TemplateRole.DealTo => "Yes, it deals opening cards",
+            TemplateRole.DealerFirst or TemplateRole.DealerNext => "Yes, that's the dealer's own card",
+            TemplateRole.Acting => "Yes, that's a player taking a card",
+            _ => "Yes",
+        };
+
+        private void DrawTeachCandidate(ChatParser.TeachCandidate cand)
+        {
+            ImGui.TextColored(HubStyle.Warn, "Learn this dealer's wording?");
+            using (ImRaii.Child("##teachRawLine", new Vector2(-1, ImGui.GetTextLineHeightWithSpacing() + 8), true))
+                ImGui.TextWrapped(cand.RawLine);
+            ImGui.PushTextWrapPos(0);
+            ImGui.TextColored(HubStyle.Muted,
+                "That line came right before your cards. If it always announces a player's opening cards, "
+                + "your hand will fill in by itself from now on.");
+            ImGui.PopTextWrapPos();
+
+            // Not Primary(): the window's one gold action is the recommended-move send button.
+            if (ImGui.Button(TeachYesLabel(cand.Role))) parser.AcceptTeach();
+            ImGui.SameLine();
+            if (ImGui.Button("No, not that line")) parser.RejectTeachCandidate();
+            ImGui.SameLine();
+            if (ImGui.Button("Not now")) parser.DismissTeach();
+            ImGui.Spacing();
+        }
+
+        private void DrawTeachExhausted()
+        {
+            ImGui.TextColored(HubStyle.Muted, "No other line to try. Keep entering cards as usual.");
+            ImGui.SameLine();
+            if (ImGui.Button("Got it")) parser.DismissTeach();
+            ImGui.Spacing();
+        }
+
+        private void DrawTeachUndo()
+        {
+            ImGui.TextColored(HubStyle.Good, "Learned.");
+            ImGui.SameLine();
+            if (ImGui.Button("Undo")) parser.UndoTeach();
+            ImGui.Spacing();
+        }
+
+        // The quiet note under the felt table once something was bound this session — most players
+        // will never open Rules on their own, so this is the only place that says the learner did
+        // anything at all.
+        private void DrawLearnedNote()
+        {
+            int learned = parser.Hypotheses.SessionBindCount(parser.DealerScope);
+            if (learned == 0) return;
+            ImGui.TextColored(HubStyle.Info, $"· learned {learned} of this dealer's lines");
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Open Rules → Learned dealer lines to see or change them.");
         }
 
         // ---- The felt table ----------------------------------------------------------
@@ -414,6 +522,7 @@ namespace BlackjackAdvisor.Windows
                 {
                     parser.State.Dealer = new Card(RankLabel(v), '♠');
                     parser.State.FilledFromChat = false;
+                    parser.NoteManualDealerCard(v);
                 }
                 if (sel) ImGui.PopStyleColor(2);
             }
@@ -425,12 +534,15 @@ namespace BlackjackAdvisor.Windows
             {
                 if (v > 1) ImGui.SameLine();
                 if (ImGui.Button($"{RankLabel(v)}##h{v}", new Vector2(34, 0)))
+                {
                     parser.State.AddCard(RankLabel(v), fromChat: false);
+                    parser.NoteManualCard(v);
+                }
             }
             ImGui.SameLine();
-            if (ImGui.Button("Undo")) parser.State.RemoveLastCard();
+            if (ImGui.Button("Undo")) { parser.State.RemoveLastCard(); parser.ClearManualEntries(); }
             ImGui.SameLine();
-            if (ImGui.Button("Clear##hclr")) parser.State.ClearHand();
+            if (ImGui.Button("Clear##hclr")) { parser.State.ClearHand(); parser.ClearManualEntries(); }
 
             if (ImGui.CollapsingHeader("Or enter a total directly"))
             {
@@ -498,6 +610,11 @@ namespace BlackjackAdvisor.Windows
             ImGui.SameLine();
             Help("Reads the dealer's messages and fills your hand + up card on your turn. Falls back to totals for dealers that don't print card symbols.");
 
+            bool learn = c.LearnDealerWording;
+            if (ImGui.Checkbox("Learn this dealer's wording", ref learn)) { c.LearnDealerWording = learn; c.Save(); }
+            ImGui.SameLine();
+            Help("Watches the totals the dealer announces and works out which lines mean what. Nothing is sent to chat and nothing leaves your machine.");
+
             var dn = c.DealerName;
             if (ImGui.InputText("Dealer name (optional)", ref dn, 48)) { c.DealerName = dn; c.Save(); }
             ImGui.SameLine(); Help("Only accept auto-fill from this sender. Leave blank to auto-detect the dealer.");
@@ -518,6 +635,9 @@ namespace BlackjackAdvisor.Windows
             ImGui.SameLine(); Help("e.g. http://192.168.1.10:9999/log — leave blank to keep it off.");
 
             ImGui.Spacing();
+            DrawLearnedLines();
+
+            ImGui.Spacing();
             ImGui.TextDisabled("Chat output");
             var ch = c.ChatChannel;
             if (ImGui.InputText("Channel", ref ch, 16)) { c.ChatChannel = ch; c.Save(); }
@@ -529,6 +649,105 @@ namespace BlackjackAdvisor.Windows
 
             ImGui.Spacing();
             ImGui.TextDisabled("Exact EV for the in-game /random (infinite-deck) game.");
+        }
+
+        // ---- Learned dealer lines ------------------------------------------------------
+
+        private void DrawLearnedLines()
+        {
+            if (!ImGui.CollapsingHeader("Learned dealer lines")) return;
+
+            var all = parser.Store.All();
+            var dealers = all.Select(l => l.Dealer).Where(d => d.Length > 0).Distinct().OrderBy(d => d).ToList();
+            var options = new List<string> { "All dealers" };
+            options.AddRange(dealers);
+            var optArray = options.ToArray();
+
+            // A filter left pointing at a dealer whose last line was just removed would show
+            // "All dealers" while still hiding every row.
+            if (learnedDealerFilter != null && !dealers.Contains(learnedDealerFilter)) learnedDealerFilter = null;
+            int idx = learnedDealerFilter == null ? 0 : Math.Max(0, dealers.IndexOf(learnedDealerFilter) + 1);
+            ImGui.SetNextItemWidth(240);
+            if (ImGui.Combo("Dealer##learnedDealer", ref idx, optArray, optArray.Length))
+                learnedDealerFilter = idx == 0 ? null : optArray[idx];
+
+            var shown = learnedDealerFilter == null ? all : all.Where(l => l.Dealer == learnedDealerFilter).ToList();
+
+            if (shown.Count == 0)
+            {
+                ImGui.TextColored(HubStyle.Muted,
+                    "Nothing learned yet. This fills in by itself once the dealer announces a few totals.");
+            }
+            else
+            {
+                using var table = ImRaii.Table("##learnedLines", 3, ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp);
+                if (table)
+                {
+                    ImGui.TableSetupColumn("Template", ImGuiTableColumnFlags.WidthStretch);
+                    ImGui.TableSetupColumn("Role", ImGuiTableColumnFlags.WidthFixed, 190f);
+                    ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, 70f);
+                    ImGui.TableHeadersRow();
+
+                    foreach (var line in shown)
+                    {
+                        using var id = ImRaii.PushId(line.Template + "|" + line.Dealer);
+                        ImGui.TableNextRow();
+
+                        ImGui.TableNextColumn();
+                        ImGui.TextWrapped(line.Template);
+
+                        ImGui.TableNextColumn();
+                        int roleIdx = Array.IndexOf(RoleOrder, RoleIds.Parse(line.Role) ?? TemplateRole.Ignore);
+                        if (roleIdx < 0) roleIdx = Array.IndexOf(RoleOrder, TemplateRole.Ignore);
+                        ImGui.SetNextItemWidth(-1);
+                        if (ImGui.Combo("##role", ref roleIdx, RoleLabels, RoleLabels.Length))
+                            parser.SetLearnedRole(line.Template, line.Dealer, RoleIds.Id(RoleOrder[roleIdx]));
+
+                        ImGui.TableNextColumn();
+                        if (ImGui.Button("Remove"))
+                            parser.RemoveLearnedLine(line.Template, line.Dealer);
+                        if (ImGui.IsItemHovered())
+                            ImGui.SetTooltip("Set a line to \"Ignore this line\" to stop it being learned again for good.");
+                    }
+                }
+            }
+
+            ImGui.TextColored(HubStyle.Faint, "<name> stands for any player's name, <n> for any number.");
+
+            if (learnedDealerFilter != null)
+            {
+                int n = all.Count(l => l.Dealer == learnedDealerFilter);
+                if (n > 0 && ImGui.Button($"Forget every line for {learnedDealerFilter}"))
+                {
+                    learnedForgetDealer = learnedDealerFilter;
+                    learnedForgetOpen = true;
+                }
+            }
+
+            DrawForgetLearnedModal();
+        }
+
+        private void DrawForgetLearnedModal()
+        {
+            if (learnedForgetOpen)
+            {
+                ImGui.OpenPopup("Forget learned lines");
+                learnedForgetOpen = false;
+            }
+
+            using var modal = ImRaii.PopupModal("Forget learned lines", ImGuiWindowFlags.AlwaysAutoResize);
+            if (!modal) return;
+
+            int n = parser.Store.All().Count(l => l.Dealer == learnedForgetDealer);
+            ImGui.TextWrapped($"Remove all {n} learned lines for {learnedForgetDealer}? They can be learned again.");
+            ImGui.Spacing();
+            if (ImGui.Button("Remove"))
+            {
+                parser.RemoveAllLearnedLinesFor(learnedForgetDealer);
+                ImGui.CloseCurrentPopup();
+            }
+            ImGui.SameLine();
+            if (ImGui.Button("Cancel")) ImGui.CloseCurrentPopup();
         }
 
         // The theme editor is generated from the kit's option table, so this stays

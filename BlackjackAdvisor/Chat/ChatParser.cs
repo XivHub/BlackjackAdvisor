@@ -20,11 +20,40 @@ namespace BlackjackAdvisor.Chat
         private string? dealerSender;   // auto-locked dealer sender name
         private string? lastChatText;   // for /bj parse
         private DateTime lastAt;        // for /bj parse
-        private int? houseStandsOn;     // the draw threshold the dealer announced, if they did
-        private bool houseHitsSoft;     // whether that announcement implies a soft threshold is hit
+        // The draw threshold the dealer announced, written on the chat thread and read on the draw
+        // thread to offer a one-click rules change. Packed into one word (-1 = unheard, the sign
+        // carries "hits a soft one") so a reader can never see half of an update and offer a
+        // threshold the dealer never said.
+        private volatile int houseRule = -1;
         private bool splitHands;        // the local player is holding two hands; which card is in which is unknowable
         private DateTime? dealingToSetAt;    // when DealingTo last changed or last saw an attributed roll
-        private TemplateRole? lastRoleEvent; // the most recent non-roll line classification, learned or built-in
+
+        // Unclaimed-roll tracking (see PendingUnclaimedRanks): a run of rolls that arrived while
+        // DealingTo was null, so nothing — learned or built-in — could ever have assigned them to a
+        // hand. Written from the chat thread (Feed), read and cleared from the draw thread (the
+        // teach banner and the manual card buttons), so this alone among the teach-flow fields
+        // needs a lock; everything else below it only ever runs on the draw thread.
+        private readonly object unclaimedGate = new();
+        private readonly List<int> unclaimedRolls = new();
+        private DateTime unclaimedLastAt;
+        private int unclaimedOpenerSeq;
+        private static readonly TimeSpan UnclaimedTimeout = TimeSpan.FromSeconds(45);
+
+        // Manually-entered card values noted through NoteManualCard since the hand was last
+        // cleared — kept separately from HandState because a hand can mix manually-clicked and
+        // chat-filled cards, and only the manual ones are ever compared against an unclaimed group.
+        // Card values the user clicked in since the hand was last cleared, by chat or by hand.
+        private readonly List<int> manualHandValues = new();
+
+        // The teach-banner proposal: up to 3 candidate opener lines to try, most likely first,
+        // offered one at a time by DrawTeachBanner. Draw-thread only.
+        private readonly List<ChatEvent> teachCandidates = new();
+        private int teachIndex;
+        private TemplateRole teachRole;
+        private bool teachExhausted;
+        private LearnedLine? lastTaughtLine;
+        private DateTime lastTaughtAt;
+        private static readonly TimeSpan UndoWindow = TimeSpan.FromSeconds(10);
 
         /// <summary>noBuiltins disables the built-in attribution regexes below the learned-store
         /// lookup — the wording guesses a venue-specific macro would otherwise need. Roll
@@ -64,6 +93,9 @@ namespace BlackjackAdvisor.Chat
             splitHands = false;
             State.ResetForNextRound();
             hypotheses.ResetForNextRound();
+            manualHandValues.Clear();
+            lock (unclaimedGate) unclaimedRolls.Clear();
+            ResetTeach();
         }
 
         // Whether the cards being dealt right now are the local player's.
@@ -71,7 +103,238 @@ namespace BlackjackAdvisor.Chat
             State.DealingTo is { } who && who != "Dealer" && ChatText.NameIs(who, me);
 
         public (int Total, bool HitsSoft)? AnnouncedHouseRule =>
-            houseStandsOn is { } n ? (n, houseHitsSoft) : null;
+            houseRule is var packed && packed >= 0 ? (packed & 0xFF, (packed & 0x100) != 0) : null;
+
+        /// <summary>The cleaned dealer scope this parser currently binds and matches learned lines
+        /// under — the same key <see cref="Store"/> and <see cref="Hypotheses"/> use, exposed so
+        /// the host's "Learned dealer lines" UI stays keyed identically.</summary>
+        public string DealerScope => ChatText.CleanName(Dealer());
+
+        // ---- Learned-line editing (host UI: Rules -> Learned dealer lines) ---------------------
+
+        /// <summary>Changes a bound line's role in place, e.g. from the row's role combo.</summary>
+        public void SetLearnedRole(string template, string dealer, string roleId)
+        {
+            store.SetRole(template, dealer, roleId);
+            learnedDirty = true;
+        }
+
+        /// <summary>Removes one bound line and vetoes it for the rest of the session, so the
+        /// checksum learner cannot re-bind what the user just took back.</summary>
+        public void RemoveLearnedLine(string template, string dealer)
+        {
+            store.Remove(template, dealer);
+            hypotheses.Veto(template, dealer);
+            learnedDirty = true;
+        }
+
+        /// <summary>"Forget every line for &lt;dealer&gt;" — removes and vetoes every line scoped
+        /// to that dealer.</summary>
+        public void RemoveAllLearnedLinesFor(string dealer)
+        {
+            foreach (var l in store.ForDealer(dealer))
+            {
+                store.Remove(l.Template, l.Dealer);
+                hypotheses.Veto(l.Template, l.Dealer);
+            }
+            learnedDirty = true;
+        }
+
+        // ---- Teach banner: unclaimed rolls and the candidate-line proposal ---------------------
+
+        /// <summary>One candidate wording the teach banner is offering to bind, and the role its
+        /// arming context implies (fixed for the life of one proposal — only the wording tried
+        /// changes as candidates are rejected).</summary>
+        public readonly record struct TeachCandidate(TemplateRole Role, string Template, string RawLine);
+
+        /// <summary>Card ranks from the most recent run of rolls that arrived with no attribution
+        /// target at all, within the last 45s — nothing in this parser, learned or built-in, could
+        /// have told whose these were. Null once claimed, dismissed, replaced by a newer run, or stale.</summary>
+        public IReadOnlyList<string>? PendingUnclaimedRanks
+        {
+            get
+            {
+                lock (unclaimedGate)
+                {
+                    if (unclaimedRolls.Count == 0 || DateTime.Now - unclaimedLastAt > UnclaimedTimeout) return null;
+                    return unclaimedRolls.Select(RankFromRandom).ToList();
+                }
+            }
+        }
+
+        /// <summary>"Those were my cards": replaces the local hand with the unclaimed group — it
+        /// reads as an opening deal, since it is standing in for the two-card line that should have
+        /// filled the hand on its own — and arms a teach proposal for the line that opened it.</summary>
+        public void ClaimUnclaimedRolls()
+        {
+            List<int> rolls;
+            int openerSeq;
+            lock (unclaimedGate)
+            {
+                if (unclaimedRolls.Count == 0) return;
+                rolls = new List<int>(unclaimedRolls);
+                openerSeq = unclaimedOpenerSeq;
+                unclaimedRolls.Clear();
+            }
+            State.ReplaceHand(rolls.Select(r => new Card(RankFromRandom(r), '♠')).ToList());
+            State.FilledFromChat = true;
+            host.Log($"claimed unclaimed rolls [{string.Join(',', rolls)}] as your hand");
+            ArmTeach(TemplateRole.DealTo, openerSeq);
+        }
+
+        /// <summary>"Not mine": drops the unclaimed group without touching the hand or proposing anything.</summary>
+        public void DismissUnclaimedRolls()
+        {
+            lock (unclaimedGate) unclaimedRolls.Clear();
+        }
+
+        /// <summary>Called from the "Add to your hand" buttons in DrawControls with the value just
+        /// clicked. When everything noted this hand matches an unclaimed group as a multiset of
+        /// card values, arms a teach proposal — a fresh two-card match reads as an opening deal, a
+        /// single-card match onto an already-noted hand reads as a hit.</summary>
+        public void NoteManualCard(int value)
+        {
+            manualHandValues.Add(value);
+            List<int> rolls;
+            int openerSeq;
+            lock (unclaimedGate)
+            {
+                if (unclaimedRolls.Count == 0) return;
+                if (!MultisetEquals(manualHandValues, unclaimedRolls.Select(CardValueFromRandom))) return;
+                rolls = new List<int>(unclaimedRolls);
+                openerSeq = unclaimedOpenerSeq;
+                unclaimedRolls.Clear();
+            }
+            var role = rolls.Count == 2 ? TemplateRole.DealTo : TemplateRole.Acting;
+            host.Log($"manual entry matches unclaimed rolls [{string.Join(',', rolls)}]");
+            manualHandValues.Clear();
+            ArmTeach(role, openerSeq);
+        }
+
+        /// <summary>Called from the dealer up-card buttons in DrawControls with the value just
+        /// clicked. This widget only ever holds one card, so a match always reads as the dealer's
+        /// first card.</summary>
+        public void NoteManualDealerCard(int value)
+        {
+            List<int> rolls;
+            int openerSeq;
+            lock (unclaimedGate)
+            {
+                if (unclaimedRolls.Count != 1 || CardValueFromRandom(unclaimedRolls[0]) != value) return;
+                rolls = new List<int>(unclaimedRolls);
+                openerSeq = unclaimedOpenerSeq;
+                unclaimedRolls.Clear();
+            }
+            host.Log($"manual dealer entry matches unclaimed roll [{rolls[0]}]");
+            ArmTeach(TemplateRole.DealerFirst, openerSeq);
+        }
+
+        /// <summary>Forgets everything noted through <see cref="NoteManualCard"/> — called when the
+        /// hand is cleared or undone by hand, so a stale note never falsely matches a later group.</summary>
+        public void ClearManualEntries() => manualHandValues.Clear();
+
+        /// <summary>The proposal currently offered, or null when there is none (either nothing has
+        /// matched yet, or every candidate for the current match has been rejected).</summary>
+        public TeachCandidate? PendingTeach =>
+            teachIndex < teachCandidates.Count
+                ? new TeachCandidate(teachRole, teachCandidates[teachIndex].MatchedTemplate!, teachCandidates[teachIndex].Raw)
+                : null;
+
+        /// <summary>True for one match's whole lifetime once its candidates run out with none
+        /// accepted — the banner's "No other line to try" state.</summary>
+        public bool TeachExhausted => teachExhausted;
+
+        /// <summary>"No, not that line": tries the next candidate, if any.</summary>
+        public void RejectTeachCandidate()
+        {
+            if (teachIndex >= teachCandidates.Count) return;
+            teachIndex++;
+            if (teachIndex >= teachCandidates.Count)
+            {
+                teachExhausted = true;
+                teachCandidates.Clear();
+            }
+        }
+
+        /// <summary>"Not now": walks away from this match without vetoing anything — the same
+        /// wording is free to propose itself again on a later match.</summary>
+        public void DismissTeach() => ResetTeach();
+
+        /// <summary>The role-specific "yes" button: binds the offered candidate as a user-confirmed
+        /// (never auto-unbound) line and arms the 10s undo window.</summary>
+        public void AcceptTeach()
+        {
+            if (PendingTeach is not { } cand) return;
+            string dealer = DealerScope;
+            var line = new LearnedLine
+            {
+                Template = cand.Template,
+                Role = RoleIds.Id(cand.Role),
+                Dealer = dealer,
+                Example = cand.RawLine,
+                Auto = false,
+                Hits = 0,
+                LearnedAtUnix = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+            };
+            if (store.Add(line))
+            {
+                lastTaughtLine = line;
+                lastTaughtAt = DateTime.Now;
+                hypotheses.NoteSessionBind(dealer);
+                learnedDirty = true;
+                host.Log($"bind {RoleIds.Id(cand.Role)} '{cand.Template}' (taught)");
+            }
+            ResetTeach();
+        }
+
+        public bool CanUndoTeach => lastTaughtLine != null && DateTime.Now - lastTaughtAt <= UndoWindow;
+
+        /// <summary>Undoes a just-taught binding within its 10s window and vetoes it for the rest
+        /// of the session, so the checksum learner cannot instantly re-bind what was just taken back.</summary>
+        public void UndoTeach()
+        {
+            if (lastTaughtLine is not { } l) return;
+            store.Remove(l.Template, l.Dealer);
+            hypotheses.Veto(l.Template, l.Dealer);
+            learnedDirty = true;
+            lastTaughtLine = null;
+        }
+
+        // Loads up to 3 candidate opener lines before the roll that started the matched group,
+        // most likely first, and offers the first one. Sets TeachExhausted directly when there is
+        // nothing to try at all — a match with no plausible preceding wording is still worth
+        // telling the user about, once, rather than silently doing nothing.
+        private void ArmTeach(TemplateRole role, int openerSeq)
+        {
+            teachCandidates.Clear();
+            teachCandidates.AddRange(evidence.CandidatesBefore(openerSeq, 3));
+            teachIndex = 0;
+            teachRole = role;
+            teachExhausted = teachCandidates.Count == 0;
+        }
+
+        private void ResetTeach()
+        {
+            teachCandidates.Clear();
+            teachIndex = 0;
+            teachExhausted = false;
+        }
+
+        private static int CardValueFromRandom(int roll) => new Card(RankFromRandom(roll), '♠').Value;
+
+        private static bool MultisetEquals(IReadOnlyCollection<int> a, IEnumerable<int> b)
+        {
+            var counts = new Dictionary<int, int>();
+            foreach (int v in a) counts[v] = counts.GetValueOrDefault(v) + 1;
+            int remaining = a.Count;
+            foreach (int v in b)
+            {
+                if (!counts.TryGetValue(v, out int c) || c == 0) return false;
+                counts[v] = c - 1;
+                remaining--;
+            }
+            return remaining == 0;
+        }
 
         // Card token in either order, case-insensitive, T or 10 for ten, optional space.
         private static readonly Regex CardRx = new(
@@ -184,7 +447,30 @@ namespace BlackjackAdvisor.Chat
             if (rollValue.HasValue || (line.IsSpeech && SenderIsDealer(sender)))
                 ev = RecordEvidence(sender, text, rollValue, line.At);
 
+            // DealingTo as of just before this line dispatches: a roll that arrives while it is
+            // still null is one HandleLine's own "if (dealingTo != null)" gate below will never
+            // pick up either, built-in or learned — that is what makes it genuinely unclaimed
+            // rather than merely unresolved for a frame.
+            // Only the dealer's rolls are candidates. "rolls a 5" is ordinary speech, and a loot
+            // roll or another table's /random must never raise "unclaimed cards" over the felt.
+            if (rollValue.HasValue && (SenderIsDealer(sender) || string.IsNullOrEmpty(sender)))
+                NoteRollForUnclaimed(rollValue.Value, line.At, ev!);
+
             HandleLine(text, sender, manual: false, roll, line.At, ev);
+        }
+
+        // Extends or restarts the unclaimed-roll run this roll belongs to. A roll that arrives once
+        // an attribution target is already known ends any run in progress — the table has moved on.
+        private void NoteRollForUnclaimed(int rollValue, DateTime at, ChatEvent ev)
+        {
+            lock (unclaimedGate)
+            {
+                if (State.DealingTo != null) { unclaimedRolls.Clear(); return; }
+                if (unclaimedRolls.Count > 0 && at - unclaimedLastAt > UnclaimedTimeout) unclaimedRolls.Clear();
+                if (unclaimedRolls.Count == 0) unclaimedOpenerSeq = ev.Seq;
+                unclaimedRolls.Add(rollValue);
+                unclaimedLastAt = at;
+            }
         }
 
         // Builds this line's wording template against the names currently known (roster, the local
@@ -310,12 +596,16 @@ namespace BlackjackAdvisor.Chat
             // this recognition runs even under --no-builtins, so it must not leak into the checksum.
             if (RoundStartRx.IsMatch(text) && (manual || SenderIsDealer(sender)))
             {
-                if (ev != null) ev.MatchedRole = TemplateRole.RoundStart;
+                if (ev != null) evidence.SetRole(ev, TemplateRole.RoundStart);
                 if (splitHands) host.Log("split hands over");
                 splitHands = false;
                 State.ResetForNextRound();
                 hypotheses.ResetForNextRound();
                 dealingToSetAt = null;
+                // Only the lock-guarded field is safe to touch from this (chat) thread — the teach
+                // banner's own candidate/undo state is draw-thread-only and is left to go stale
+                // until the ledger's own NextRound() or a fresh match supersedes it.
+                lock (unclaimedGate) unclaimedRolls.Clear();
                 host.Log("round start");
                 return;
             }
@@ -369,12 +659,11 @@ namespace BlackjackAdvisor.Chat
                     string who = deal.Groups[1].Value.Trim();
                     string dealingToNow = who.Contains("Dealer", oic) ? "Dealer" : who;
                     SetDealingTo(dealingToNow, at);
-                    lastRoleEvent = TemplateRole.DealTo;
                     bool mineDeal = ChatText.NameIs(who, me);
                     // Only clear the hand. The up card is cleared when a new one is coming — the
                     // dealer's own reveal below, or a round start — never because a player was dealt:
                     // a dealer plays out a split by re-running this same line, mid-round.
-                    if (mineDeal) State.ClearHand();
+                    if (mineDeal) { State.ClearHand(); manualHandValues.Clear(); }
                     if (dealingToNow == "Dealer") State.Dealer = null;
                     host.Log($"dealing to {dealingToNow}{(mineDeal ? " (you)" : $", you are {me}")}");
                     return;
@@ -389,7 +678,6 @@ namespace BlackjackAdvisor.Chat
                     SetDealingTo("Dealer", at);
                     bool first = reveal.Groups[1].Value.Equals("first", oic);
                     if (first) State.Dealer = null;
-                    lastRoleEvent = first ? TemplateRole.DealerFirst : TemplateRole.DealerNext;
                     host.Log("dealer reveal");
                     return;
                 }
@@ -425,7 +713,6 @@ namespace BlackjackAdvisor.Chat
                     bool myTurnNow = !ended && ChatText.NameIs(who, me);
                     SetDealingTo(dealingToNow, at);
                     State.MyTurn = myTurnNow;
-                    lastRoleEvent = ended ? TemplateRole.EndTurn : TemplateRole.Acting;
                     host.Log($"{who} -> {act.Groups[2].Value}, myTurn={myTurnNow}");
                     return;
                 }
@@ -437,7 +724,6 @@ namespace BlackjackAdvisor.Chat
                     string who = prompt.Groups[1].Value.Trim();
                     SetDealingTo(who, at);
                     State.MyTurn = ChatText.NameIs(who, me);
-                    lastRoleEvent = TemplateRole.Acting;
                 }
             }
 
@@ -490,7 +776,6 @@ namespace BlackjackAdvisor.Chat
                 {
                     if (!manual && !SenderIsDealer(sender)) return;
                     ApplyBareTotal(bare, me);
-                    lastRoleEvent = TemplateRole.Total;
                     return;
                 }
             }
@@ -546,14 +831,14 @@ namespace BlackjackAdvisor.Chat
             {
                 case TemplateRole.DealTo:
                 {
-                    subject = slots.Count > 0 ? slots[0] : "-";
+                    subject = FirstNameSlot(kinds, slots);
                     State.MyTurn = false;
                     SetDealingTo(subject, at);
                     // Only clear the hand. The up card is cleared when a new one is coming — the
                     // dealer's own reveal, or a round start — never because a player was dealt:
                     // a dealer plays out a split by re-running this same line, mid-round. Mirrors
                     // the built-in deal path exactly.
-                    if (ChatText.NameIs(subject, me)) State.ClearHand();
+                    if (ChatText.NameIs(subject, me)) { State.ClearHand(); manualHandValues.Clear(); }
                     break;
                 }
                 case TemplateRole.DealerFirst:
@@ -568,7 +853,7 @@ namespace BlackjackAdvisor.Chat
                     SetDealingTo("Dealer", at);
                     break;
                 case TemplateRole.Acting:
-                    subject = slots.Count > 0 ? slots[0] : "-";
+                    subject = FirstNameSlot(kinds, slots);
                     SetDealingTo(subject, at);
                     State.MyTurn = ChatText.NameIs(subject, me);
                     break;
@@ -596,20 +881,20 @@ namespace BlackjackAdvisor.Chat
                     State.ResetForNextRound();
                     hypotheses.ResetForNextRound();
                     dealingToSetAt = null;
+                    lock (unclaimedGate) unclaimedRolls.Clear();
                     break;
                 case TemplateRole.Ignore:
                 default:
                     break;
             }
 
-            lastRoleEvent = role;
             // The four checksum roles must stay eligible candidate openers even once bound — the
             // learner re-verifies a bound line's arithmetic on every later occurrence,
             // which needs its own group to still resolve an Opener for it. Only the roles outside
             // the checksum's four (EndTurn, Total, RoundStart, Ignore) are ever "explained" here.
             if (ev != null && role is not (TemplateRole.DealTo or TemplateRole.DealerFirst
                 or TemplateRole.DealerNext or TemplateRole.Acting))
-                ev.MatchedRole = role;
+                evidence.SetRole(ev, role);
             host.Log($"learned {RoleIds.Id(role)} '{line.Template}' -> {subject}");
         }
 
@@ -663,9 +948,9 @@ namespace BlackjackAdvisor.Chat
                 hitsSoft = m.Success && text.Contains("hits soft", StringComparison.OrdinalIgnoreCase);
             }
             if (!m.Success || !int.TryParse(m.Groups[1].Value, out int n) || n is < 12 or > 21) return;
-            if (houseStandsOn == n && houseHitsSoft == hitsSoft) return;
-            houseStandsOn = n;
-            houseHitsSoft = hitsSoft;
+            int packed = n | (hitsSoft ? 0x100 : 0);
+            if (houseRule == packed) return;
+            houseRule = packed;
             host.Log($"house rule announced: stands on {n}{(hitsSoft ? ", hits soft" : "")}");
         }
 
@@ -771,6 +1056,16 @@ namespace BlackjackAdvisor.Chat
         }
 
         // A /random 1-13 draw -> card rank (1=A, 11/12/13 = J/Q/K, all worth 10).
+        // A role says what kind of event a line is; its name slot says whose. A template can carry
+        // numbers before the name ("dealing <n> cards over to <name>"), so the subject is the first
+        // <name> slot rather than whichever slot happens to come first.
+        private static string FirstNameSlot(IReadOnlyList<bool> kinds, IReadOnlyList<string> slots)
+        {
+            for (int i = 0; i < kinds.Count && i < slots.Count; i++)
+                if (kinds[i]) return slots[i];
+            return "-";
+        }
+
         internal static string RankFromRandom(int n) => n switch
         {
             1 => "A",

@@ -17,6 +17,8 @@ Wizard of Odds infinite-deck EVs.
 - One-click buttons to say your move in chat — **only when you press them, never automatic**.
 - Live gil session tracker (net since session start, read from inventory) + manual W/L/P.
 - Auto-fills your hand + dealer up card from the dealer's chat on your turn (toggle in Rules).
+- Learns a new venue's wording on its own from the totals the dealer announces, and can be taught
+  a line directly from a banner over the table when it can't (see "Teaching a new dealer" below).
 
 ## Build
 ```
@@ -66,6 +68,30 @@ resolves an abbreviated subject against — in the running plugin this comes fro
 - ImGui layout/readability in the live client.
 
 ## Auto-fill limitation
-If a dealer prints neither turn headers (`... 's Turn ...`) nor name-prefixed hand lines
-(`<Name>, your hand is ...` / `<Name>, would you like to ...`) nor per-player deal lines, a generic
-"Your Hand is:" line can't be attributed to you, so it won't auto-fill. Manual entry always works. See `chat-samples.md` for the formats handled.
+Built-in recognition covers the wording in `chat-samples.md`; a venue that phrases things
+differently is picked up by the checksum learner instead of a new regex (see "Teaching a new
+dealer" below). Auto-fill only fails outright when a dealer's macro gives no turn header, no
+name-prefixed hand line, no per-player deal line, *and* no announced total or outcome to check a
+hypothesis against — that combination shows up as an "Unclaimed cards" banner over the table.
+Manual entry always works regardless.
+
+## Teaching a new dealer
+The plugin learns a dealer's wording from arithmetic, not a list of known phrases: it watches which
+line precedes a run of `/random` rolls, and checks whether the total the dealer announces next
+balances against those rolls under the standard card values (10/J/Q/K=10, A=1/11). Two confirmations
+with different rolls bind the line with no input from you; the "· learned N of this dealer's lines"
+note under the table says when it happened. Turn it off in Rules -> "Learn this dealer's wording" if
+a venue's chat should never be read this way.
+
+When a dealer never announces a total to check against, two banners over the table can still teach
+it directly:
+- "Unclaimed cards" appears once a run of rolls has nobody to belong to. "Those were my cards" fills
+  your hand for that round and offers to bind the line that opened it; "Not mine" drops it.
+- Entering your hand with the ordinary card buttons does the same check: if what you clicked matches
+  an unclaimed run of rolls, the same offer appears for the line that came before them.
+
+Accepting an offer binds it as a confirmed line, which — unlike the automatic guesses above, which
+unbind themselves after three totals in a row that don't balance — the checksum learner never
+touches again. "Undo" reverses a binding for 10 seconds after teaching it. Every learned line, for
+every dealer, is listed under Rules -> "Learned dealer lines": change what a line means with its
+role dropdown, remove one, or forget every line for a dealer and start over.

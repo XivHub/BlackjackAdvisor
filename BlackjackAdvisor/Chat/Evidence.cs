@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace BlackjackAdvisor.Chat
 {
@@ -65,20 +66,12 @@ namespace BlackjackAdvisor.Chat
             }
         }
 
-        /// <summary>The most recent dealer lines (never rolls), oldest first.</summary>
-        public System.Collections.Generic.IReadOnlyList<ChatEvent> RecentDealerLines(int n)
+        /// <summary>Records what a line turned out to mean. Taken under the same gate as the
+        /// readers: a TemplateRole? is two fields, so an unsynchronized write can be read half
+        /// applied — present, carrying the wrong role.</summary>
+        public void SetRole(ChatEvent ev, TemplateRole role)
         {
-            lock (gate)
-            {
-                var list = new System.Collections.Generic.List<ChatEvent>();
-                for (int i = 0; i < count && list.Count < n; i++)
-                {
-                    var ev = ring[(head - 1 - i + Capacity) % Capacity];
-                    if (ev != null && ev.Roll == null) list.Add(ev);
-                }
-                list.Reverse();
-                return list;
-            }
+            lock (gate) ev.MatchedRole = role;
         }
 
         /// <summary>The most recent event before <paramref name="seq"/> that still counts as an
@@ -103,6 +96,30 @@ namespace BlackjackAdvisor.Chat
                     return ev;
                 }
                 return null;
+            }
+        }
+
+        /// <summary>Up to <paramref name="max"/> candidate openers before <paramref name="seq"/>,
+        /// most recent first — the "walk back" list a rejected teach proposal tries next. Same
+        /// eligibility and RoundStart boundary as <see cref="LastCandidateBefore"/>, except a
+        /// RoundStart stops the walk (rather than voiding every candidate already found before it,
+        /// since those still occurred in the current round).</summary>
+        public IReadOnlyList<ChatEvent> CandidatesBefore(int seq, int max)
+        {
+            lock (gate)
+            {
+                var result = new List<ChatEvent>();
+                for (int i = 0; i < count && result.Count < max; i++)
+                {
+                    var ev = ring[(head - 1 - i + Capacity) % Capacity];
+                    if (ev == null || ev.Seq >= seq) continue;
+                    if (ev.MatchedRole == TemplateRole.RoundStart) break;
+                    if (ev.Roll != null) continue;
+                    if (ev.MatchedRole is not (null or TemplateRole.Total)) continue;
+                    if (ev.MatchedTemplate == null || LineTemplate.IsTooGeneral(ev.MatchedTemplate)) continue;
+                    result.Add(ev);
+                }
+                return result;
             }
         }
     }

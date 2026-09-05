@@ -24,7 +24,8 @@ namespace BlackjackAdvisor
         public bool AutoFillFromChat { get; set; } = true;
         public bool ChatDebug { get; set; } = false;   // log what the parser extracts
 
-        // Dealer-format learner (see Chat/TemplateStore.cs). Nothing writes to LearnedLines yet.
+        // Dealer-format learner (see Chat/TemplateStore.cs). Written back from the framework
+        // thread whenever the learner binds, unbinds, or the user edits a row.
         public List<LearnedLine> LearnedLines { get; set; } = new();
         public bool LearnDealerWording { get; set; } = true;
 
