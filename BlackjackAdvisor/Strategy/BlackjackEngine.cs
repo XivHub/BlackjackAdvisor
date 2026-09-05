@@ -27,13 +27,15 @@ namespace BlackjackAdvisor.Strategy
     /// Ace = 1/11. Nothing is removed between draws, so the distribution over card *values* is
     /// A=1/13, 2..9=1/13 each, 10-value=4/13 — identical to an infinite-deck shoe. That makes the
     /// optimal move exactly computable by expected value (no strategy-table transcription, no card
-    /// counting, deck count irrelevant). Rule variants (dealer soft-17, double-after-split) are
-    /// parameters, so the same engine covers every host's ruleset.
+    /// counting, deck count irrelevant). Rule variants (where the dealer stands, whether a soft hand
+    /// at that total is hit, double-after-split) are parameters, so the same engine covers every
+    /// host's ruleset.
     /// </summary>
     public sealed class BlackjackEngine
     {
-        private readonly bool h17; // dealer hits soft 17 (vs stands)
-        private readonly bool das; // double after split allowed
+        private readonly int standOn; // dealer draws below this total (17 in a casino)
+        private readonly bool h17;    // dealer hits a soft hand at that total (vs stands)
+        private readonly bool das;    // double after split allowed
 
         // Draw probability by card value 1..10 (1 = Ace, 10 = any ten-value card).
         private static readonly double[] P = BuildProbs();
@@ -53,13 +55,14 @@ namespace BlackjackAdvisor.Strategy
         private readonly Dictionary<int, double> hitMemo = new();
         private double[] dd = Array.Empty<double>(); // current dealer final-total distribution
 
-        public BlackjackEngine(bool dealerHitsSoft17, bool doubleAfterSplit)
+        public BlackjackEngine(bool dealerHitsSoft17, bool doubleAfterSplit, int dealerStandsOn = 17)
         {
+            standOn = Math.Clamp(dealerStandsOn, 12, 21);
             h17 = dealerHitsSoft17;
             das = doubleAfterSplit;
         }
 
-        /// <summary>Dealer's final-total distribution from an up card (index 0 = bust, 17..21 = total). For inspection/tests.</summary>
+        /// <summary>Dealer's final-total distribution from an up card (index 0 = bust, standOn..21 = total). For inspection/tests.</summary>
         public double[] DealerDistributionFromUp(int up)
         {
             var s = Add(0, false, up);
@@ -80,8 +83,8 @@ namespace BlackjackAdvisor.Strategy
 
         private bool DealerStands(int total, bool soft)
         {
-            if (total >= 18) return true;
-            if (total == 17) return soft ? !h17 : true; // hard 17 always; soft 17 only if S17
+            if (total > standOn) return true;
+            if (total == standOn) return soft ? !h17 : true; // hard always; soft only if S17
             return false;
         }
 
@@ -121,7 +124,7 @@ namespace BlackjackAdvisor.Strategy
         {
             if (playerTotal > 21) return -1.0;
             double ev = dd[0]; // dealer busts => +1
-            for (int dt = 17; dt <= 21; dt++)
+            for (int dt = standOn; dt <= 21; dt++)
             {
                 if (dt < playerTotal) ev += dd[dt];
                 else if (dt > playerTotal) ev -= dd[dt];

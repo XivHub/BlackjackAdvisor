@@ -12,7 +12,8 @@ Wizard of Odds infinite-deck EVs.
 ## Features
 - Enter your hand with card buttons (or a bare total for dealers that only announce numbers).
 - Shows the recommended move, the EV of every option, and a one-line reason.
-- Configurable rules: dealer H17/S17, double-after-split, and whether the host offers double/split.
+- Configurable rules: the total the dealer stands on (17 in a casino, some hosts stop at 16),
+  whether a soft one is hit, double-after-split, and whether the host offers double/split.
 - One-click buttons to say your move in chat — **only when you press them, never automatic**.
 - Live gil session tracker (net since session start, read from inventory) + manual W/L/P.
 - Auto-fills your hand + dealer up card from the dealer's chat on your turn (toggle in Rules).

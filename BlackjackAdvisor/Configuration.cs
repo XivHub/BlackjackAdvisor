@@ -10,6 +10,7 @@ namespace BlackjackAdvisor
         public int Version { get; set; } = 1;
 
         // Dealer rules
+        public int DealerStandsOn { get; set; } = 17;       // dealer draws below this total
         public bool DealerHitsSoft17 { get; set; } = true;  // H17 (common); false = S17
         public bool DoubleAfterSplit { get; set; } = true;
 

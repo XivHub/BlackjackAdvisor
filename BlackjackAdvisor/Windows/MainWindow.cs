@@ -43,6 +43,7 @@ namespace BlackjackAdvisor.Windows
 
         private BlackjackEngine? engine;
         private bool lastH17, lastDas;
+        private int lastStandOn;
 
         // Gil ledger
         private int sessionStartGil = -1;
@@ -87,11 +88,13 @@ namespace BlackjackAdvisor.Windows
 
         private BlackjackEngine Engine()
         {
-            if (engine == null || lastH17 != c.DealerHitsSoft17 || lastDas != c.DoubleAfterSplit)
+            if (engine == null || lastH17 != c.DealerHitsSoft17 || lastDas != c.DoubleAfterSplit
+                || lastStandOn != c.DealerStandsOn)
             {
-                engine = new BlackjackEngine(c.DealerHitsSoft17, c.DoubleAfterSplit);
+                engine = new BlackjackEngine(c.DealerHitsSoft17, c.DoubleAfterSplit, c.DealerStandsOn);
                 lastH17 = c.DealerHitsSoft17;
                 lastDas = c.DoubleAfterSplit;
+                lastStandOn = c.DealerStandsOn;
             }
             return engine;
         }
@@ -412,15 +415,28 @@ namespace BlackjackAdvisor.Windows
 
         private void DrawRules()
         {
-            var header = $"Rules: dealer {(c.DealerHitsSoft17 ? "hits" : "stands on")} soft 17"
+            var header = $"Rules: dealer stands on {c.DealerStandsOn}"
+                       + (c.DealerHitsSoft17 ? $", hits soft {c.DealerStandsOn}" : "")
                        + (c.HostAllowsDouble ? ", double" : "")
                        + (c.HostAllowsSplit ? ", split" : "");
             if (!ImGui.CollapsingHeader(header)) return;
 
-            bool h17 = c.DealerHitsSoft17;
-            if (ImGui.Checkbox("Dealer hits soft 17 (H17)", ref h17)) { c.DealerHitsSoft17 = h17; c.Save(); }
+            int so = c.DealerStandsOn;
+            ImGui.SetNextItemWidth(90);
+            if (ImGui.InputInt("Dealer stands on", ref so))
+            {
+                c.DealerStandsOn = Math.Clamp(so, 12, 21);
+                c.Save();
+            }
             ImGui.SameLine();
-            Help("Off = dealer stands on soft 17 (S17). If unsure, ask the host.");
+            Help("The total the dealer stops drawing at. 17 is the casino rule; some hosts stop at 16, "
+               + "which makes the dealer bust far less often and changes when you should stand.");
+
+            bool h17 = c.DealerHitsSoft17;
+            if (ImGui.Checkbox($"Dealer hits soft {c.DealerStandsOn}", ref h17)) { c.DealerHitsSoft17 = h17; c.Save(); }
+            ImGui.SameLine();
+            Help($"On = the dealer draws again on a soft {c.DealerStandsOn} (an ace counted as 11). "
+               + "Off = they stop. If unsure, ask the host.");
 
             bool das = c.DoubleAfterSplit;
             if (ImGui.Checkbox("Double after split allowed", ref das)) { c.DoubleAfterSplit = das; c.Save(); }
