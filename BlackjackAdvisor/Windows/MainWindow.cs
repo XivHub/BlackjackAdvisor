@@ -655,8 +655,9 @@ namespace BlackjackAdvisor.Windows
                 myTurn = false;
                 string who = deal.Groups[1].Value.Trim();
                 dealingTo = who.Contains("Dealer", oic) ? "Dealer" : who;
-                if (NameIs(who, me)) { hand.Clear(); dealer = null; totalMode = false; filledFromChat = false; }
-                Dbg($"dealing to {dealingTo}");
+                bool mineDeal = NameIs(who, me);
+                if (mineDeal) { hand.Clear(); dealer = null; totalMode = false; filledFromChat = false; }
+                Dbg($"dealing to {dealingTo}{(mineDeal ? " (you)" : $", you are {me}")}");
                 return;
             }
 
@@ -676,14 +677,15 @@ namespace BlackjackAdvisor.Windows
             if (!mentionsHand && text.Contains("Turn", oic))
             {
                 bool dealerTurn = text.Contains("Dealer", oic);
-                myTurn = !dealerTurn && text.Contains(me, oic);
+                myTurn = !dealerTurn && NameMentioned(text, me);
                 dealingTo = dealerTurn ? "Dealer" : null;
                 Dbg($"turn -> myTurn={myTurn}, dealingTo={dealingTo ?? "-"}");
                 return;
             }
 
             // A hand is over, so nobody draws until the next player is prompted.
-            if (text.Contains("stays with", oic) || text.Contains("busted", oic))
+            if (text.Contains("stays with", oic) || text.Contains("busted", oic)
+                || text.Contains("got a blackjack", oic) || text.Contains("has a blackjack", oic))
             {
                 dealingTo = null;
                 myTurn = false;
@@ -717,7 +719,8 @@ namespace BlackjackAdvisor.Windows
                 int? rv = roll ?? RollValueFromText(text);
                 if (rv is >= 1 and <= 13)
                 {
-                    if (!manual && !SenderIsDealer(sender)) { Dbg($"draw from '{sender}' != dealer '{Dealer()}'"); return; }
+                    if (!manual && !SenderIsDealer(sender) && !string.IsNullOrEmpty(sender))
+                    { Dbg($"draw from '{sender}' != dealer '{Dealer()}'"); return; }
                     if (NameIs(dealingTo, me))
                     {
                         hand.Add(new Card(RankFromRandom(rv.Value), Suits[hand.Count % 4]));
@@ -730,6 +733,7 @@ namespace BlackjackAdvisor.Windows
                         dealer = new Card(RankFromRandom(rv.Value), '♠');
                         Dbg($"dealer up {dealer.Value.Rank}");
                     }
+                    else Dbg($"draw {RankFromRandom(rv.Value)} -> {dealingTo}, not you");
                     return;
                 }
 
@@ -808,12 +812,36 @@ namespace BlackjackAdvisor.Windows
             totalMode = true; filledFromChat = true;
         }
 
-        // Chat renders a cross-world player as "<name><world icon><World>" while the object table
-        // holds only the character name, so the local player is identified by the leading name.
+        // Chat rarely shows the name the object table holds. The client's name-display setting
+        // abbreviates either half ("Hina Reizei" reaches chat as "H. Reizei", "Hina R." or "H. R."),
+        // and a cross-world player carries a world icon and home world after it. So a chat rendering
+        // is matched against every form the character's real name can take, by prefix.
         private static bool NameIs(string candidate, string me)
         {
             candidate = CleanName(candidate);
-            return candidate.Length > 0 && candidate.StartsWith(me, StringComparison.OrdinalIgnoreCase);
+            if (candidate.Length == 0 || string.IsNullOrEmpty(me)) return false;
+            foreach (var form in NameForms(me))
+                if (candidate.StartsWith(form, StringComparison.OrdinalIgnoreCase)) return true;
+            return false;
+        }
+
+        /// <summary>Whether a line names the given character in any of its chat renderings.</summary>
+        private static bool NameMentioned(string text, string me)
+        {
+            foreach (var form in NameForms(me))
+                if (text.Contains(form, StringComparison.OrdinalIgnoreCase)) return true;
+            return false;
+        }
+
+        private static IEnumerable<string> NameForms(string me)
+        {
+            yield return me;
+            int sp = me.IndexOf(' ');
+            if (sp <= 0 || sp >= me.Length - 1) yield break;
+            string first = me[..sp], last = me[(sp + 1)..];
+            yield return $"{first} {last[0]}.";
+            yield return $"{first[0]}. {last}";
+            yield return $"{first[0]}. {last[0]}.";
         }
 
         private static string CleanName(string s)
@@ -841,7 +869,7 @@ namespace BlackjackAdvisor.Windows
         {
             a = CleanName(a);
             b = CleanName(b);
-            if (a.Length == 0 || b.Length == 0) return true;
+            if (a.Length == 0 || b.Length == 0) return false;
             return a.StartsWith(b, StringComparison.OrdinalIgnoreCase)
                 || b.StartsWith(a, StringComparison.OrdinalIgnoreCase);
         }

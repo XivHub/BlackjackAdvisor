@@ -72,8 +72,10 @@ Random! (1-13) 11
 
 Parsing notes:
 - The name trails the deal line (`... Cards <name>!`) instead of taking a possessive.
-- A cross-world player appears as `Lielle C.Shiva` (name + world icon + world), so the local
-  player is matched on the leading name, not on equality.
+- Names in chat are not the names the object table holds. The client's name-display setting
+  abbreviates either half, so `Hina Reizei` arrives as `Hina R.` (also possible: `H. Reizei`,
+  `H. R.`), and a cross-world player carries the world after it: `Lielle C.Shiva`. Match a chat
+  rendering against every form of the character's real name, by prefix.
 - `reveal ... first/second Card` is the only marker for the dealer's own draws; the up card is
   the first of them, so later draws never replace it.
 - `<name> chooses to Hit` / `<name> chooses Hit!` (the "to" is not always there) / `is forced to
