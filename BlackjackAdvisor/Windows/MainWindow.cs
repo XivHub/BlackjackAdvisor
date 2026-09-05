@@ -588,6 +588,7 @@ namespace BlackjackAdvisor.Windows
             catch { return; }
             if (string.IsNullOrEmpty(text)) return;
             lastChatText = text;
+            Dbg($"«{handler.LogKind}» [{sender}] {(text.Length > 100 ? text[..100] : text)}");
 
             // The game's /random result carries a language-independent chat type; read the value from it
             // (last number, fullwidth-normalized for the JP client) rather than trusting localized text.
@@ -598,9 +599,18 @@ namespace BlackjackAdvisor.Windows
                           || RandomRx.IsMatch(text)
                           || TurnRx.IsMatch(text)
                           || text.Contains("Dealer's Hand", StringComparison.OrdinalIgnoreCase);
-            if (marker && !string.IsNullOrEmpty(sender)) dealerSender = sender;
+            if (marker && !string.IsNullOrEmpty(sender)) dealerSender = CleanName(sender);
 
             HandleLine(text, sender, manual: false, roll);
+        }
+
+        public void Status()
+        {
+            var me = Plugin.ObjectTable.LocalPlayer?.Name.TextValue ?? "(none)";
+            Plugin.ChatGui.Print($"[BJ] you='{me}'  dealer='{Dealer()}'  auto-fill={(c.AutoFillFromChat ? "on" : "off")}");
+            Plugin.ChatGui.Print($"[BJ] dealing to='{dealingTo ?? "-"}'  my turn={myTurn}  "
+                + $"hand={(totalMode ? $"total {inTotal}" : hand.Count == 0 ? "-" : string.Concat(hand.Select(h => h.Rank + " ")))} "
+                + $"up card={(dealer?.Rank ?? "-")}");
         }
 
         public void ForceParseLast()
@@ -622,7 +632,7 @@ namespace BlackjackAdvisor.Windows
             if (!deal.Success) deal = FirstCardsRx.Match(text);
             if (deal.Success)
             {
-                if (!manual && !SenderIsDealer(sender)) return;
+                if (!manual && !SenderIsDealer(sender)) { Dbg($"deal line from '{sender}' != dealer '{Dealer()}'"); return; }
                 myTurn = false;
                 string who = deal.Groups[1].Value.Trim();
                 dealingTo = who.Contains("Dealer", oic) ? "Dealer" : who;
@@ -688,7 +698,7 @@ namespace BlackjackAdvisor.Windows
                 int? rv = roll ?? RollValueFromText(text);
                 if (rv is >= 1 and <= 13)
                 {
-                    if (!manual && !SenderIsDealer(sender)) return;
+                    if (!manual && !SenderIsDealer(sender)) { Dbg($"draw from '{sender}' != dealer '{Dealer()}'"); return; }
                     if (NameIs(dealingTo, me))
                     {
                         hand.Add(new Card(RankFromRandom(rv.Value), Suits[hand.Count % 4]));
@@ -800,9 +810,21 @@ namespace BlackjackAdvisor.Windows
         private bool SenderIsDealer(string sender)
         {
             if (!string.IsNullOrWhiteSpace(c.DealerName))
-                return sender.Contains(c.DealerName, StringComparison.OrdinalIgnoreCase);
+                return CleanName(sender).StartsWith(CleanName(c.DealerName), StringComparison.OrdinalIgnoreCase);
             if (string.IsNullOrEmpty(dealerSender)) return true; // not locked yet -> allow bootstrap
-            return string.Equals(sender, dealerSender, StringComparison.OrdinalIgnoreCase);
+            return SameSpeaker(sender, dealerSender);
+        }
+
+        // One speaker reaches chat under more than one rendering: a /random result and a party line
+        // carry different sender payloads for the same person — the world suffix and the job icon
+        // come and go, and a system-typed line carries no sender at all. Compare on the name.
+        private static bool SameSpeaker(string a, string b)
+        {
+            a = CleanName(a);
+            b = CleanName(b);
+            if (a.Length == 0 || b.Length == 0) return true;
+            return a.StartsWith(b, StringComparison.OrdinalIgnoreCase)
+                || b.StartsWith(a, StringComparison.OrdinalIgnoreCase);
         }
 
         private void ParseAndFill(string text)

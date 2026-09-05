@@ -47,7 +47,7 @@ namespace BlackjackAdvisor
 
             CommandManager.AddHandler(commandName, new CommandInfo(OnCommand)
             {
-                HelpMessage = "Open the Blackjack Advisor. '/bj parse' force-reads the last chat line."
+                HelpMessage = "Open the Blackjack Advisor. '/bj parse' force-reads the last chat line, '/bj status' shows what the parser sees."
             });
 
             PluginInterface.UiBuilder.Draw += DrawUI;
@@ -70,9 +70,15 @@ namespace BlackjackAdvisor
 
         private void OnCommand(string command, string args)
         {
-            if (args.Trim().Equals("parse", StringComparison.OrdinalIgnoreCase))
+            var arg = args.Trim();
+            if (arg.Equals("parse", StringComparison.OrdinalIgnoreCase))
             {
                 mainWindow.ForceParseLast();
+                return;
+            }
+            if (arg.Equals("status", StringComparison.OrdinalIgnoreCase))
+            {
+                mainWindow.Status();
                 return;
             }
             mainWindow.Toggle();

@@ -23,7 +23,8 @@ Wizard of Odds infinite-deck EVs.
 DALAMUD_HOME=~/.cache/dalamud-dev DOTNET_ROOT=~/.dotnet \
   dotnet build BlackjackAdvisor/BlackjackAdvisor.csproj -c Release -p:Platform=x64
 ```
-Deploy: bump `<Version>`, then `publish-plugin` (or `./publish.sh`). Command: `/bj`.
+Deploy: bump `<Version>`, then `publish-plugin` (or `./publish.sh`). Commands: `/bj`, `/bj status`
+(what the parser currently sees), `/bj parse` (force-read the last chat line).
 
 ## Needs in-game verification (compiles ≠ works)
 - `IChatGui.ChatMessage` handler fires and `Message.TextValue` contains the card glyphs (♣♠♦♥).
