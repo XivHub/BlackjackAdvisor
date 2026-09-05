@@ -26,6 +26,11 @@ DALAMUD_HOME=~/.cache/dalamud-dev DOTNET_ROOT=~/.dotnet \
 Deploy: bump `<Version>`, then `publish-plugin` (or `./publish.sh`). Commands: `/bj`, `/bj status`
 (what the parser currently sees), `/bj parse` (force-read the last chat line).
 
+Turning on "Send the parser trace to a dev log" in Rules and pointing it at
+`~/dev/XivHubPluginKit/devlog_server.py` (`http://<box>:9999/log`) records every chat line the parser
+saw and what it made of it, so a whole table can be read back afterwards instead of scrolled through
+in game chat. It stays dormant with no URL set.
+
 ## Needs in-game verification (compiles ≠ works)
 - `IChatGui.ChatMessage` handler fires and `Message.TextValue` contains the card glyphs (♣♠♦♥).
 - Chat auto-fill: ownership gating (turn header / name-prefix vs `ObjectTable.LocalPlayer.Name`),

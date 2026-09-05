@@ -6,6 +6,7 @@ using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using ECommons;
 using BlackjackAdvisor.Windows;
+using XivHubPluginKit;
 using XivHubPluginKit.UI;
 
 namespace BlackjackAdvisor
@@ -27,6 +28,9 @@ namespace BlackjackAdvisor
         /// <summary>Shared across every XIV Hub plugin; see XivHubPluginKit/UI/THEME.md.</summary>
         public static HubThemeConfigService ThemeConfig { get; private set; } = null!;
 
+        /// <summary>Dormant unless the user turns on the dev log and sets an endpoint.</summary>
+        public static DevTelemetry Telemetry { get; private set; } = null!;
+
         public WindowSystem WindowSystem = new("BlackjackAdvisor");
         private readonly MainWindow mainWindow;
 
@@ -41,6 +45,10 @@ namespace BlackjackAdvisor
                 PluginInterface.GetPluginConfigDirectory(),
                 (msg, ex) => Logger.Warning(ex, msg));
             HubStyle.Init(ThemeConfig);
+
+            Telemetry = new DevTelemetry("BlackjackAdvisor",
+                () => Configuration.DevLog, () => Configuration.DevLogUrl,
+                msg => Logger.Warning(msg));
 
             mainWindow = new MainWindow(Configuration);
             WindowSystem.AddWindow(mainWindow);
@@ -63,6 +71,7 @@ namespace BlackjackAdvisor
 
             WindowSystem.RemoveAllWindows();
             mainWindow.Dispose();
+            Telemetry.Dispose();
             CommandManager.RemoveHandler(commandName);
 
             ECommonsMain.Dispose();

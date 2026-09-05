@@ -21,6 +21,10 @@ namespace BlackjackAdvisor
         // Chat auto-fill
         public bool AutoFillFromChat { get; set; } = true;
         public bool ChatDebug { get; set; } = false;   // log what the parser extracts
+
+        // Dev log: mirrors the parser trace to a local devlog server (see XivHubPluginKit).
+        public bool DevLog { get; set; } = false;
+        public string DevLogUrl { get; set; } = "";
         public string DealerName { get; set; } = "";    // optional: only accept lines from this sender
 
         // Chat output

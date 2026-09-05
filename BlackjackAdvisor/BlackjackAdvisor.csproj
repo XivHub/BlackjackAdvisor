@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<Authors>Zhyra</Authors>
 		<Company>ZhyraPlugins</Company>
-		<Version>0.4.2</Version>
+		<Version>0.4.3</Version>
 		<Description>Blackjack basic-strategy advisor and gil tracker.</Description>
 		<PackageProjectUrl>https://github.com/edg-l/BlackjackAdvisor</PackageProjectUrl>
 		<IsPackable>false</IsPackable>
@@ -22,5 +22,6 @@
 		<Compile Include="..\..\XivHubPluginKit\UI\HubStyle.cs" Link="Kit\UI\HubStyle.cs" />
 		<Compile Include="..\..\XivHubPluginKit\UI\HubThemeConfig.cs" Link="Kit\UI\HubThemeConfig.cs" />
 		<Compile Include="..\..\XivHubPluginKit\UI\HubThemeEditor.cs" Link="Kit\UI\HubThemeEditor.cs" />
+		<Compile Include="..\..\XivHubPluginKit\DevTelemetry.cs" Link="Kit\DevTelemetry.cs" />
 	</ItemGroup>
 </Project>

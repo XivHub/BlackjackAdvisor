@@ -104,6 +104,11 @@ namespace BlackjackAdvisor.Windows
             bool ready = dealer.HasValue && (totalMode || hand.Count > 0);
             EvalResult? r = ready ? Evaluate() : null;
 
+            Plugin.Telemetry.Snapshot(() =>
+                $"you={(totalMode ? $"total {inTotal}{(inSoft ? " soft" : "")}" : hand.Count == 0 ? "-" : string.Concat(hand.Select(h => h.Rank)))}"
+                + $" up={dealer?.Rank ?? "-"} dealingTo={dealingTo ?? "-"} myTurn={myTurn}"
+                + $" filled={filledFromChat} best={(r?.HasBest == true ? r.Best.ToString() : "-")}");
+
             DrawRules();
             ImGui.Spacing();
             DrawTable(r);
@@ -458,7 +463,18 @@ namespace BlackjackAdvisor.Windows
 
             bool dbg = c.ChatDebug;
             if (ImGui.Checkbox("Debug parser (log to chat)", ref dbg)) { c.ChatDebug = dbg; c.Save(); }
-            ImGui.SameLine(); Help("Prints what the parser extracts from each candidate line. Use '/bj parse' to force-read the last line.");
+            ImGui.SameLine(); Help("Prints every chat line the parser sees and what it made of it. Use '/bj status' for the current state and '/bj parse' to force-read the last line.");
+
+            bool dev = c.DevLog;
+            if (ImGui.Checkbox("Send the parser trace to a dev log", ref dev)) { c.DevLog = dev; c.Save(); }
+            ImGui.SameLine();
+            ImGui.TextColored(Plugin.Telemetry.Active ? HubStyle.Good : HubStyle.Faint,
+                Plugin.Telemetry.Active ? "sending" : "off");
+            ImGui.SameLine(); Help("Posts the same trace to a log server on your network, so a whole table can be read back afterwards instead of scrolled through in chat.");
+
+            var du = c.DevLogUrl;
+            if (ImGui.InputText("Dev log URL", ref du, 128)) { c.DevLogUrl = du; c.Save(); }
+            ImGui.SameLine(); Help("e.g. http://192.168.1.10:9999/log — leave blank to keep it off.");
 
             ImGui.Spacing();
             ImGui.TextDisabled("Chat output");
@@ -574,8 +590,11 @@ namespace BlackjackAdvisor.Windows
         private static readonly Regex DigitRunRx = new(@"\d+", RegexOptions.Compiled);
         private static readonly Regex SummaryRx = new(@"([^,]+?)'s\s+hand\s+is\s+(\d{1,2})", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
+        // The parser trace goes to the dev log whenever one is configured, and to game chat only
+        // when the user asked to see it there.
         private void Dbg(string msg)
         {
+            Plugin.Telemetry.Log(msg);
             if (c.ChatDebug) Plugin.ChatGui.Print($"[BJ] {msg}");
         }
 
