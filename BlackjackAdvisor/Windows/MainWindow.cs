@@ -579,9 +579,10 @@ namespace BlackjackAdvisor.Windows
         private static readonly Regex ActionRx = new(
             @"^\s*(.+?)\s+(?:chooses|choose|decides|opts|wants|is\s+forced)(?:\s+to)?\s+(hit|stand|double|split)",
             RegexOptions.IgnoreCase | RegexOptions.Compiled);
-        // A hand announced as a number on its own line: "15", "1 or 11", "Blackjack 16".
+        // A hand announced as a number on its own line: "15", "1 or 11", "1/11", "Blackjack 16".
+        // An ace is written both ways, so the second number is the soft reading either way.
         private static readonly Regex BareTotalRx = new(
-            @"^[\s\-–—]*(?:blackjack|total|score|hand)?[\s:!.]*(\d{1,2})(?:\s*or\s*(\d{1,2}))?\s*[.!]*$",
+            @"^[\s\-–—]*(?:blackjack|total|score|hand)?[\s:!.]*(\d{1,2})(?:\s*(?:or|/)\s*(\d{1,2}))?\s*[.!]*$",
             RegexOptions.IgnoreCase | RegexOptions.Compiled);
         // A /random result: "(1-13) 9", tolerant of locale prefix (Random!/Würfeln!), en/em dashes and spacing.
         private static readonly Regex RandomRx = new(@"\(\s*\d{1,2}\s*[-–—]\s*\d{1,2}\s*\)\s*(\d{1,2})", RegexOptions.Compiled);
