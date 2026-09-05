@@ -76,7 +76,7 @@ Parsing notes:
   player is matched on the leading name, not on equality.
 - `reveal ... first/second Card` is the only marker for the dealer's own draws; the up card is
   the first of them, so later draws never replace it.
-- `<name> chooses to Hit` / `is forced to Stand` and the `<name>, would you like to ...` prompt
-  say who the next `Random!` belongs to.
+- `<name> chooses to Hit` / `<name> chooses Hit!` (the "to" is not always there) / `is forced to
+  Stand`, and the `<name>, would you like to ...` prompt, say who the next `Random!` belongs to.
 - A bare total line (`18`, `1 or 11`, `Blackjack 16`) fills the hand when the draws were missed,
   and overrides parsed cards when it disagrees with them.

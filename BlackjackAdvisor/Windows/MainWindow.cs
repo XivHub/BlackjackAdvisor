@@ -559,9 +559,9 @@ namespace BlackjackAdvisor.Windows
         private static readonly Regex FirstCardsRx = new(@"\bfirst\s+two\s+cards?\b[:\s]*(.+?)[\s!?]*$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         // "Time to reveal the Dealer's first Card!" — some macros drop the name ("the 's first Card").
         private static readonly Regex RevealRx = new(@"\breveal\b[^.!?]*?\b(first|second|next)\s+card", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-        // "<name> chooses to Double Down!" / "<name> is forced to Stand!"
+        // "<name> chooses to Double Down!" / "<name> chooses Hit!" / "<name> is forced to Stand!"
         private static readonly Regex ActionRx = new(
-            @"^\s*(.+?)\s+(?:chooses|choose|decides|opts|wants|is\s+forced)\s+to\s+(hit|stand|double|split)",
+            @"^\s*(.+?)\s+(?:chooses|choose|decides|opts|wants|is\s+forced)(?:\s+to)?\s+(hit|stand|double|split)",
             RegexOptions.IgnoreCase | RegexOptions.Compiled);
         // A hand announced as a number on its own line: "15", "1 or 11", "Blackjack 16".
         private static readonly Regex BareTotalRx = new(
