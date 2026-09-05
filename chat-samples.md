@@ -88,3 +88,26 @@ Parsing notes:
   characters are dropped. Read them back as letters before parsing; the job and world icons
   (other private-use characters) really are decoration.
 - The dealer's macro states the house rule out loud: `DEALER is below 16 and rolls again.`
+
+## Split hands (same venue)
+
+A split is played by re-running the deal macro once per hand, one card at a time, with both hands'
+totals on a single line:
+
+```
+ Here is your first two Cards Hina R.!
+Random! (1-13) 7          <- one card for hand 1
+Random! (1-13) 3          <- one card for hand 2
+13 - 9                    <- hand 1 is 13, hand 2 is 9
+ Here is your first two Cards Hina R.!
+Random! (1-13) 9
+Random! (1-13) 13
+bust - 19
+```
+
+Which draw belongs to which hand is not recoverable from the chat, so two totals on one line
+switches auto-fill off for the rest of the round rather than showing one wrong hand. The up card
+survives, so each hand can be entered by hand and still be advised against the right dealer card.
+That is why a player's deal line never clears the up card: only the dealer's own reveal and a
+round-start line (`All players have placed their bets`, `New round begins`, `Thank you for playing`)
+do.
