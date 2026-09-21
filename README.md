@@ -29,9 +29,10 @@ Deploy: bump `<Version>`, then `publish-plugin` (or `./publish.sh`). Commands: `
 (what the parser currently sees), `/bj parse` (force-read the last chat line).
 
 Turning on "Send the parser trace to a dev log" in Rules and pointing it at
-`~/dev/XivHubPluginKit/devlog_server.py` (`http://<box>:9999/log`) records every chat line the parser
-saw and what it made of it, so a whole table can be read back afterwards instead of scrolled through
-in game chat. It stays dormant with no URL set.
+`~/dev/XivHubPluginKit/devlog_server.py` (`http://<box>:9999/log`) records every speech or roll line
+the parser considered and what it made of it, so a whole table can be read back afterwards instead of
+scrolled through in game chat. Battle, crafting and system channels are named once and then ignored,
+so an evening of other content costs a handful of lines. It stays dormant with no URL set.
 
 ### Parser harness
 `tools/ParserHarness` replays a captured dev log through the real `Chat/` parser, outside Dalamud,

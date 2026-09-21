@@ -20,6 +20,7 @@ namespace BlackjackAdvisor.Chat
         private string? dealerSender;   // auto-locked dealer sender name
         private string? lastChatText;   // for /bj parse
         private DateTime lastAt;        // for /bj parse
+        private readonly HashSet<string> droppedKinds = new();   // channels already reported as ignored
         // The draw threshold the dealer announced, written on the chat thread and read on the draw
         // thread to offer a one-click rules change. Packed into one word (-1 = unheard, the sign
         // carries "hits a soft one") so a reader can never see half of an update and offer a
@@ -418,7 +419,6 @@ namespace BlackjackAdvisor.Chat
             string text = line.Text, sender = line.Sender;
             lastChatText = text;
             lastAt = line.At;
-            host.Log($"«{line.Kind}» [{sender}] {(text.Length > 100 ? text[..100] : text)}");
 
             // Only speech and roll results are ever dealer wording or a player's die roll; every
             // other channel (buffs, item use, system messages) carries no attribution signal and,
@@ -426,9 +426,16 @@ namespace BlackjackAdvisor.Chat
             // a hand-relevant line, but never worth even trying to classify as one either.
             if (!line.IsSpeech && !line.IsRandomRoll)
             {
-                host.Log("dropped: not speech or a roll");
+                // The trace is what the parser considered, not what the game printed: a busy zone
+                // prints thousands of battle and system lines an hour, and echoing them buries the
+                // handful that matter. One line per channel still answers the only question these
+                // can answer, which is whether a dealer's channel is missing from SpeechTypes.
+                if (droppedKinds.Add(line.Kind))
+                    host.Log($"ignoring «{line.Kind}» lines: not speech or a roll");
                 return;
             }
+
+            host.Log($"«{line.Kind}» [{sender}] {(text.Length > 100 ? text[..100] : text)}");
 
             int? roll = presetRoll;
 
